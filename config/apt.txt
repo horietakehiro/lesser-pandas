@@ -2,3 +2,5 @@ wget
 vim
 curl
 git
+gcc
+

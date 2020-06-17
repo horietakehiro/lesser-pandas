@@ -1,3 +1,5 @@
 root
 /codes/lesser-pandas/bin
 /codes/lesser-pandas/pkg
+/codes/lesser-pandas/src/*
+!/codes/lesser-pandas/src/lpandas
