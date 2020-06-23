@@ -120,10 +120,10 @@ func (df *DataFrame) Describe() {
 		mins[i] = min
 		stds[i] = std
 	}
-	outputDescribe(df, counts, sums, means, maxes, mins, stds)
+	stdOutDescribe(df, counts, sums, means, maxes, mins, stds)
 }
 
-func outputDescribe(df *DataFrame, counts, sums, means, maxes, mins, stds []float64) {
+func stdOutDescribe(df *DataFrame, counts, sums, means, maxes, mins, stds []float64) {
 	strCounts := make([]string, len(counts))
 	strSums := make([]string, len(sums))
 	strMeans := make([]string, len(means))
