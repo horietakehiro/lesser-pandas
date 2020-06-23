@@ -90,7 +90,6 @@ func (df *DataFrame) Describe() {
 		for j := 0; j < df.Shape[0]; j++ {
 			val := df.Rows[j][i]
 			sum += val
-			mean += val
 			// initialize max, min
 			if j == 0 {
 				max = val
@@ -104,16 +103,19 @@ func (df *DataFrame) Describe() {
 				min = val
 			}
 		}
+		// calc mean using sum
+		mean = sum / float64(df.Shape[0])
+
 		// calc standard deviation using mean
 		sigmaSquared := float64(0)
 		for j := 0; j < df.Shape[0]; j++ {
-			sigmaSquared += math.Pow(df.Rows[j][i] - (mean / float64(df.Shape[0])), 2)
+			sigmaSquared += math.Pow(df.Rows[j][i] - mean, 2)
 		}
 		std = math.Sqrt(sigmaSquared / float64(df.Shape[0]))
 
 		counts[i] = float64(df.Shape[0])
 		sums[i] = sum
-		means[i] = mean / float64(df.Shape[0])
+		means[i] = mean
 		maxes[i] = max
 		mins[i] = min
 		stds[i] = std
