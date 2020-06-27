@@ -26,6 +26,33 @@ func TestDataFrame1(t *testing.T)  {
 
 }
 
+func ExampleDataFrameInfo() {
+	csvData := PrepareDataFrame4Test()
+	
+	csvData.Info()
+	// Output:
+	// RangeIndex: 891 entries, 0 to 890
+	// Data columns (total 12 columns):
+	// ===== Numeric columns (total 7 columns) =====
+	// name,non-null,null,dtype
+	// PassengerId,891,0,float64
+	// Survived,891,0,float64
+	// Pclass,891,0,float64
+	// Age,714,177,float64
+	// SibSp,891,0,float64
+	// Parch,891,0,float64
+	// Fare,891,0,float64
+	//
+	// ===== String columns (total 5 columns) =====
+	// name,non-null,null,dtype
+	// Name,891,0,string
+	// Sex,891,0,string
+	// Ticket,891,0,string
+	// Cabin,204,687,string
+	// Embarked,889,2,string
+	
+
+}
 // func ExampleDataFrame() {
 // 	csvData := PrepareDataFrame4Test()
 // 	csvData.Describe()

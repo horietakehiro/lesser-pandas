@@ -1,10 +1,11 @@
 package lpandas
 
 import (
-	// "fmt"
+	"fmt"
 	"os"
 	"encoding/csv"
 	"strconv"
+	"reflect"
 	// "strings"
 	// "io"
 	"math"
@@ -106,6 +107,78 @@ func (df *DataFrame) ReadCsv(filePath string) {
 
 }
 
+// Info stdout an basic infomation of the DataFrame.
+func (df *DataFrame) Info() {
+	// count the number of null rows in each columns.
+	// We handle math.NaN in NumericRows and "" in StringRows as null value
+	numericNullCounts := make(map[string]int, len(df.NumericColumns))
+	stringNullCounts := make(map[string]int, len(df.StringColumns))
+
+	// initiate Nullounts maps
+	for _, col := range df.NumericColumns {
+		numericNullCounts[col] = 0
+	}
+	for _, col := range df.StringColumns {
+		stringNullCounts[col] = 0
+	}
+
+	// count null rows 
+	for _, row := range df.NumericRows {
+		for j, col := range df.NumericColumns {
+			if math.IsNaN(row[j]) {
+				numericNullCounts[col]++
+			}
+		}
+	}
+	for _, row := range df.StringRows {
+		for j, col := range df.StringColumns {
+			if row[j] == "" {
+				stringNullCounts[col]++
+			}
+		}
+	}
+
+	stdoutInfo(df, numericNullCounts, stringNullCounts)
+
+
+}
+
+
+func stdoutInfo(df *DataFrame, numericNullCounts, stringNullCounts map[string]int) {
+	// header
+	if df.NumericShape[0] != 0 {
+		fmt.Printf("RangeIndex: %d entries, %d to %d\n", 
+				df.NumericShape[0], 0, df.NumericShape[0] - 1)
+	} else {
+		fmt.Printf("RangeIndex: %d entries, %d to %d\n", 
+				df.StringShape[0], 0, df.StringShape[0] - 1)
+	}
+	fmt.Printf("Data columns (total %d columns):\n",
+		df.NumericShape[1] + df.StringShape[1])
+
+	// Numeric
+	fmt.Printf("===== Numeric columns (total %d columns) =====\n",
+		df.NumericShape[1])
+	fmt.Println("name,non-null,null,dtype")
+	for _,col := range df.NumericColumns {
+		fmt.Printf("%s,%d,%d,%s\n",
+			col, df.NumericShape[0] - numericNullCounts[col], 
+			numericNullCounts[col], reflect.TypeOf(df.NumericRows[0][0]))
+	}
+	
+	fmt.Println("")
+
+	// String
+	fmt.Printf("===== String columns (total %d columns) =====\n",
+		df.StringShape[1])
+	fmt.Println("name,non-null,null,dtype")
+	for _,col := range df.StringColumns {
+		fmt.Printf("%s,%d,%d,%s\n",
+			col, df.StringShape[0] - stringNullCounts[col], 
+			stringNullCounts[col], reflect.TypeOf(df.StringRows[0][0]))
+	}
+	
+}
 // // Describe stdout the dataframe's
 // // count, mean, max, min, 25percentile, 50percentile, 75percentile
 // // via column-wise
