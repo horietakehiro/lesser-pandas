@@ -6,33 +6,41 @@ import (
 	"encoding/csv"
 	"strconv"
 	"reflect"
-	// "strings"
+	"sort"
+	"strings"
 	// "io"
 	"math"
 
 	"lpandas/helper"
 )
 
+
+
 // DataFrame is a struct for storing structured data, like csv.
 // DataFrame has two types of columns and rows : Numeric / String
 type DataFrame struct {
-	NumericColumns []string
-	NumericRows [][]float64
+
+	Numeric map[string][]float64
 	NumericShape [2]int
 
-	StringColumns []string
-	StringRows [][]string
+	String map[string][]string
 	StringShape [2]int
 	
 }
 
 // GetShape get the dataframe's shape [r, c]
 func (df *DataFrame) GetShape() {
-	df.NumericShape[0] = len(df.NumericRows)
-	df.NumericShape[1] = len(df.NumericColumns)
+	for _, v := range df.Numeric {
+		df.NumericShape[0] = len(v)
+		break
+	}
+	df.NumericShape[1] = len(df.Numeric)
 
-	df.StringShape[0] = len(df.StringRows)
-	df.StringShape[1] = len(df.StringColumns)
+	for _, v := range df.String {
+		df.StringShape[0] = len(v)
+		break
+	}
+	df.StringShape[1] = len(df.String)
 }
 
 // ReadCsv read csv file and store its first row as columns 
@@ -45,10 +53,17 @@ func (df *DataFrame) ReadCsv(filePath string) {
 	}
 
 	csvReader := csv.NewReader(file)
+
+	// firstly, check whether all rows in each columns can be converted into float or not.
 	allRows, err := csvReader.ReadAll()
 	if err != nil {
 		panic(err)
 	}
+
+	// initiate maps for suppress "assignment to entry in nil map" error
+	df.String = map[string][]string{}
+	df.Numeric = map[string][]float64{}
+
 	// firstly, check whether all rows in each columns can be converted into float or not.
 	for i, col := range allRows[0] {
 		isNumeric := true
@@ -63,45 +78,49 @@ func (df *DataFrame) ReadCsv(filePath string) {
 			} else {
 				_, err := strconv.ParseFloat(row[i], 64)
 				if err != nil {
-					df.StringColumns = append(df.StringColumns, col)
+					df.String[col] = []string{}
 					isNumeric = false
 					break
 				}
 			}
 		}
 		if isNumeric {
-			df.NumericColumns = append(df.NumericColumns, col)
+			df.Numeric[col] = []float64{}
 		}
 	}
+	stringCols := []string{}
+	for k := range df.String {
+		stringCols = append(stringCols, k)
+	}
 
-	// secondlly, store rows in StringColumns as raw
-	// store rows in NumericColumns with converting into float
-	for i, row := range allRows {
-		if i == 0 {
-			// first row is columns
-			continue
-		}
-		tmpNumericRow := make([]float64, len(df.NumericColumns))
-		tmpStringRow := make([]string, len(df.StringColumns))
-		tmpNumericIndex := int(0)
-		tmpStringIndex := int(0)
-		for j, r := range row {
-			if helper.PythonicStrIfInList(allRows[0][j], df.StringColumns) {
-				tmpStringRow[tmpStringIndex] = r
-				tmpStringIndex++
-			} else {
-				rFloated, err := strconv.ParseFloat(r, 64)
-				if err != nil {
-					rFloated = math.NaN()
-				}
-				tmpNumericRow[tmpNumericIndex] = rFloated
-				tmpNumericIndex++
+	// secondlly, store rows in String Columns as raw,
+	// and store rows in Numeric Columns with converting into float
+	allRowLength := len(allRows) - 1 // exclude colum row
+	for i := 0; i < len(df.String) + len(df.Numeric); i++ {
+		col := allRows[0][i]
+		
+		if helper.PythonicStrIfInList(col, stringCols) {
+
+			tmpStringRows := make([]string, allRowLength)
+			for j := 0; j < allRowLength; j++ {
+				tmpStringRows[j] = allRows[j+1][i]
 			}
-		}
-		df.StringRows = append(df.StringRows, tmpStringRow)
-		df.NumericRows = append(df.NumericRows, tmpNumericRow)
-	}
+			df.String[col] = tmpStringRows
 
+		} else {
+
+			tmpNumericRows := make([]float64, allRowLength)
+			for j := 0; j < allRowLength; j++ {
+
+				tmpFloat, err := strconv.ParseFloat(allRows[j+1][i], 64)
+				if err != nil {
+					tmpFloat = math.NaN()
+				}
+				tmpNumericRows[j] = tmpFloat
+			}
+			df.Numeric[col] = tmpNumericRows
+		}
+	}
 	// finally, store shapes of numeric and string rows
 	df.GetShape()
 
@@ -111,29 +130,30 @@ func (df *DataFrame) ReadCsv(filePath string) {
 func (df *DataFrame) Info() {
 	// count the number of null rows in each columns.
 	// We handle math.NaN in NumericRows and "" in StringRows as null value
-	numericNullCounts := make(map[string]int, len(df.NumericColumns))
-	stringNullCounts := make(map[string]int, len(df.StringColumns))
+	numericNullCounts := make(map[string]int, df.NumericShape[1])
+	stringNullCounts := make(map[string]int, df.StringShape[1])
+
 
 	// initiate Nullounts maps
-	for _, col := range df.NumericColumns {
+	for col := range df.Numeric {
 		numericNullCounts[col] = 0
 	}
-	for _, col := range df.StringColumns {
+	for col := range df.String {
 		stringNullCounts[col] = 0
 	}
 
 	// count null rows 
-	for _, row := range df.NumericRows {
-		for j, col := range df.NumericColumns {
-			if math.IsNaN(row[j]) {
-				numericNullCounts[col]++
+	for key, values := range df.Numeric {
+		for _, val := range values {
+			if math.IsNaN(val) {
+				numericNullCounts[key]++
 			}
 		}
 	}
-	for _, row := range df.StringRows {
-		for j, col := range df.StringColumns {
-			if row[j] == "" {
-				stringNullCounts[col]++
+	for key, values := range df.String {
+		for _, val := range values {
+			if val == "" {
+				stringNullCounts[key]++
 			}
 		}
 	}
@@ -145,6 +165,19 @@ func (df *DataFrame) Info() {
 
 
 func stdoutInfo(df *DataFrame, numericNullCounts, stringNullCounts map[string]int) {
+
+	orderedNumericKeys := []string{}
+	orderedStringKeys := []string{}
+	for key := range numericNullCounts {
+		orderedNumericKeys = append(orderedNumericKeys, key)
+	}
+	sort.Strings(orderedNumericKeys)
+
+	for key := range stringNullCounts {
+		orderedStringKeys = append(orderedStringKeys, key)
+	}
+	sort.Strings(orderedStringKeys)
+
 	// header
 	if df.NumericShape[0] != 0 {
 		fmt.Printf("RangeIndex: %d entries, %d to %d\n", 
@@ -160,10 +193,10 @@ func stdoutInfo(df *DataFrame, numericNullCounts, stringNullCounts map[string]in
 	fmt.Printf("===== Numeric columns (total %d columns) =====\n",
 		df.NumericShape[1])
 	fmt.Println("name,non-null,null,dtype")
-	for _,col := range df.NumericColumns {
+	for _, key := range orderedNumericKeys {
 		fmt.Printf("%s,%d,%d,%s\n",
-			col, df.NumericShape[0] - numericNullCounts[col], 
-			numericNullCounts[col], reflect.TypeOf(df.NumericRows[0][0]))
+			key, df.NumericShape[0] - numericNullCounts[key], 
+			numericNullCounts[key], reflect.TypeOf(df.Numeric[key][0]))
 	}
 	
 	fmt.Println("")
@@ -172,93 +205,228 @@ func stdoutInfo(df *DataFrame, numericNullCounts, stringNullCounts map[string]in
 	fmt.Printf("===== String columns (total %d columns) =====\n",
 		df.StringShape[1])
 	fmt.Println("name,non-null,null,dtype")
-	for _,col := range df.StringColumns {
+	for _, key := range orderedStringKeys {
 		fmt.Printf("%s,%d,%d,%s\n",
-			col, df.StringShape[0] - stringNullCounts[col], 
-			stringNullCounts[col], reflect.TypeOf(df.StringRows[0][0]))
+			key, df.StringShape[0] - stringNullCounts[key], 
+			stringNullCounts[key], reflect.TypeOf(df.String[key][0]))
 	}
+
 	
 }
-// // Describe stdout the dataframe's
-// // count, mean, max, min, 25percentile, 50percentile, 75percentile
-// // via column-wise
-// func (df *DataFrame) Describe() {
-// 	counts := make([]float64, df.Shape[1])
-// 	sums := make([]float64, df.Shape[1])
-// 	means := make([]float64, df.Shape[1])
-// 	maxes := make([]float64, df.Shape[1])
-// 	mins := make([]float64, df.Shape[1])
-// 	stds := make([]float64, df.Shape[1])
+
+// Describe stdout the dataframe's statistical description of each columns.
+// NumericColumns : count, mean, std, min, 25%, 50%, 75%, max, sum
+// StringColumns : count, unique, top, freq
+func (df *DataFrame) Describe() {
+
+	numericStatistics := calclNumericStatistics(df)
+	stringIntStatistics, stringStrStatistics := calcStringStatistics(df)
+
+	stdoutDescribe(df, 
+		numericStatistics, 
+		stringIntStatistics, stringStrStatistics)
+
+}
+
+func calclNumericStatistics(df *DataFrame) map[string]map[string]float64 {
+	// e.g. {"count" : {"Age" : 100, "..." : ...}, ...}
+	numericStatistics := map[string]map[string]float64{
+		"count" : map[string]float64{},
+		"mean" : map[string]float64{},
+		"std" : map[string]float64{},
+		"min" : map[string]float64{},
+		"25%" : map[string]float64{},
+		"50%" : map[string]float64{},
+		"75%" : map[string]float64{},
+		"max" : map[string]float64{},
+		"sum" : map[string]float64{},
+	}
+
+	// initiate maps 
+	for _, val := range numericStatistics {
+		for key := range df.Numeric {
+			val[key] = 0.0
+		}
+	}
+
+	for key, values := range df.Numeric {
+		// firstlly, sort acsendingly
+		sort.Sort(helper.AcsendingSort(values))
+
+		calcFlag := true
+		for i, val := range df.Numeric[key] {
+			if math.IsNaN(val) {
+				continue
+			}
+
+			// sum
+			numericStatistics["sum"][key] += val
+
+			// min, count
+			if calcFlag {
+				numericStatistics["min"][key] = val
+				numericStatistics["count"][key] = float64(df.NumericShape[0] - i)
+				calcFlag = false
+				continue
+			}
+
+		}
+		// max
+		numericStatistics["max"][key] = df.Numeric[key][df.NumericShape[0]-1]
+		// mean
+		numericStatistics["mean"][key] = numericStatistics["sum"][key] / numericStatistics["count"][key]
+		// std
+		sigmaSquared := float64(0)
+		for _, val := range df.Numeric[key] {
+			if !math.IsNaN(val) {
+				sigmaSquared += math.Pow(val -
+								 numericStatistics["mean"][key], 2)
+			}
+		}
+		numericStatistics["std"][key] = math.Sqrt(
+			sigmaSquared / numericStatistics["count"][key])
+
+		// percentiles
+		numericStatistics["25%"][key] = calcPercentile(df.Numeric[key], 0.25)
+		numericStatistics["50%"][key] = calcPercentile(df.Numeric[key], 0.50)
+		numericStatistics["75%"][key] = calcPercentile(df.Numeric[key], 0.75)
+		
+	}
+
+	return numericStatistics
+
+}
+
+func calcStringStatistics(df *DataFrame) (map[string]map[string]int, map[string]map[string]string) {
+	stringIntStatistics := map[string]map[string]int{
+		"count" : map[string]int{},
+		"unique" : map[string]int{},
+		"freq" : map[string]int{},
+	}
+	stringStrStatistics := map[string]map[string]string {
+		"top" : map[string]string{},
+	}
+
+	// initiate maps 
+	for key := range df.String {
+		for _, val := range stringIntStatistics {
+			val[key] = 0
+		}
+		for _, val := range stringStrStatistics {
+			val[key] = ""
+		}
+	}
+
+	for key, values := range df.String {
+		sort.Strings(values)
+		calcFlag := true
+		tmpCounter := map[string]int{}
+
+		for i, val := range df.String[key] {
+			if val == "" {
+				continue
+			}
+
+			// count (exclude empty entry : "" )
+			if calcFlag {
+				stringIntStatistics["count"][key] = df.StringShape[0] - i
+				calcFlag = false
+			}
+
+			// for unique, top, freq
+			tmpCounter[val]++
+
+		}
+
+		// unique, top, frep
+
+		stringIntStatistics["unique"][key] = len(tmpCounter)
+		mostCommonKeys, mostCommonValues := helper.PythonicStrCounterMostCommon(
+			tmpCounter, 1)
+		stringIntStatistics["freq"][key] = mostCommonValues[0]
+
+		stringStrStatistics["top"][key] = mostCommonKeys[0]
 
 
-// 	for i := 0; i < df.Shape[1]; i++ {
-// 		// count := float64(0)
-// 		mean := float64(0)
-// 		sum := float64(0)
-// 		max := float64(0)
-// 		min := float64(0)
-// 		std := float64(0)
+	}
 
-// 		for j := 0; j < df.Shape[0]; j++ {
-// 			val := df.Rows[j][i]
-// 			sum += val
-// 			// initialize max, min
-// 			if j == 0 {
-// 				max = val
-// 				min = val
-// 			}
+	return stringIntStatistics, stringStrStatistics
 
-// 			if max < val {
-// 				max = val
-// 			}
-// 			if min > val {
-// 				min = val
-// 			}
-// 		}
-// 		// calc mean using sum
-// 		mean = sum / float64(df.Shape[0])
+}
 
-// 		// calc standard deviation using mean
-// 		sigmaSquared := float64(0)
-// 		for j := 0; j < df.Shape[0]; j++ {
-// 			sigmaSquared += math.Pow(df.Rows[j][i] - mean, 2)
-// 		}
-// 		std = math.Sqrt(sigmaSquared / float64(df.Shape[0]))
+func calcPercentile(values []float64, percentile float64) float64 {
+	nonNullValues := []float64{}
+	for _, val := range values {
+		if !math.IsNaN(val) {
+			nonNullValues = append(nonNullValues, val)
+		}
+	}
+	N := len(nonNullValues) - 1 // this is not a length, but distance from head to tail
+	p := float64(N) * percentile
+	q := int(math.Floor(p))
+	r := p - float64(q)
+	D := nonNullValues[q] + (nonNullValues[q+1] - nonNullValues[q]) * r // linear interporation
+	return D
+}
 
-// 		counts[i] = float64(df.Shape[0])
-// 		sums[i] = sum
-// 		means[i] = mean
-// 		maxes[i] = max
-// 		mins[i] = min
-// 		stds[i] = std
-// 	}
-// 	stduutDescribe(df, counts, sums, means, maxes, mins, stds)
-// }
+func stdoutDescribe(df *DataFrame, 
+	numericStatistics map[string]map[string]float64,
+	stringIntStatistics map[string]map[string]int,
+	stringStrStatistics map[string]map[string]string) {
 
-// func stduutDescribe(df *DataFrame, counts, sums, means, maxes, mins, stds []float64) {
-// 	strCounts := make([]string, len(counts))
-// 	strSums := make([]string, len(sums))
-// 	strMeans := make([]string, len(means))
-// 	strMaxes := make([]string, len(maxes))
-// 	strMins := make([]string, len(mins))
-// 	strStds := make([]string, len(stds))
+	orderedNumericMetric := []string{"count", "mean", "std", "min", "25%", "50%", "75%", "max", "sum"}
+	orderedNumericColumns := []string{}
+	for key := range df.Numeric {
+		orderedNumericColumns = append(orderedNumericColumns, key)
+	}
+	sort.Strings(orderedNumericColumns)
+
+	orderedStringIntMetric := []string{"count", "unique", "freq"}
+	orderedStringStrMetric := []string{"top"}
+	orderedStringColumns := []string{}
+	for key := range df.String {
+		orderedStringColumns = append(orderedStringColumns, key)
+	}
+	sort.Strings(orderedStringColumns)
 
 
-// 	for i := 0; i < df.Shape[0]; i++ {
-// 		strCounts[i] = fmt.Sprintf("%.3f", counts[i])
-// 		strSums[i] = fmt.Sprintf("%.3f", sums[i])
-// 		strMeans[i] = fmt.Sprintf("%.3f", means[i])
-// 		strMaxes[i] = fmt.Sprintf("%.3f", maxes[i])
-// 		strMins[i] = fmt.Sprintf("%.3f", mins[i])
-// 		strStds[i] = fmt.Sprintf("%.3f", stds[i])
-// 	}
 
-// 	fmt.Printf("metric,%s\n",strings.Join(df.Columns, ","))
-// 	fmt.Printf("count,%s\n",strings.Join(strCounts, ","))
-// 	fmt.Printf("sum,%s\n",strings.Join(strSums, ","))
-// 	fmt.Printf("mean,%s\n",strings.Join(strMeans, ","))
-// 	fmt.Printf("max,%s\n",strings.Join(strMaxes, ","))
-// 	fmt.Printf("min,%s\n",strings.Join(strMins, ","))	
-// 	fmt.Printf("std,%s\n",strings.Join(strStds, ","))
+	fmt.Printf("=== Numeric columns (total %d columns) =====\n", len(orderedNumericColumns))
+	fmt.Printf("metric,%s\n", strings.Join(orderedNumericColumns, ","))
+	for _, key := range orderedNumericMetric {
+		stdoutString := key + ","
+		for j, col := range orderedNumericColumns {
+			stdoutString += fmt.Sprintf("%.3f", numericStatistics[key][col])
+			if j < len(orderedNumericColumns) - 1 {
+				stdoutString += ","
+			}
+		}
+		fmt.Println(stdoutString)
+	}
 
-// }
+	fmt.Println("")
+
+	fmt.Printf("=== String columns (total %d columns) =====\n", len(orderedStringColumns))
+	fmt.Printf("metric,%s\n", strings.Join(orderedStringColumns, ","))
+	for _, key := range orderedStringIntMetric {
+		stdoutString := key + ","
+		for j, col := range orderedStringColumns {
+			stdoutString += fmt.Sprintf("%d", stringIntStatistics[key][col])
+			if j < len(orderedStringColumns) - 1 {
+				stdoutString += ","
+			}
+		}
+		fmt.Println(stdoutString)
+	}
+	for _, key := range orderedStringStrMetric {
+		stdoutString := key + ","
+		for j, col := range orderedStringColumns {
+			stdoutString += fmt.Sprintf("%s", stringStrStatistics[key][col])
+			if j < len(orderedStringColumns) - 1 {
+				stdoutString += ","
+			}
+		}
+		fmt.Println(stdoutString)
+	}
+
+}
