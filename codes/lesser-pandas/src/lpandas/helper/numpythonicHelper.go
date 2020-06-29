@@ -76,10 +76,9 @@ func (arr NumpythonicFloatArray) Max() float64 {
 		if max < val && isValid(val) {
 			max = val
 		}
-
-		if invalidFlag {
-			return math.NaN()
-		}
+	}
+	if invalidFlag {
+		return math.NaN()
 	}
 	return max
 }
@@ -105,10 +104,9 @@ func (arr NumpythonicFloatArray) Min() float64 {
 		if min > val && isValid(val) {
 			min = val
 		}
-
-		if invalidFlag {
-			return math.NaN()
-		}
+	}
+	if invalidFlag {
+		return math.NaN()
 	}
 	return min
 }
@@ -167,6 +165,7 @@ func (arr NumpythonicFloatArray) Sort(desc bool) NumpythonicFloatArray {
 
 // Percentile returns array's values located on the location
 func (arr NumpythonicFloatArray) Percentile(location float64) float64 {
+	arr = arr.Sort(false)
 	validValues := NumpythonicFloatArray{}
 	for _, val := range arr {
 		if isValid(val) {
@@ -179,6 +178,7 @@ func (arr NumpythonicFloatArray) Percentile(location float64) float64 {
 	if len(validValues) == 1 {
 		return validValues[0]
 	}
+
 
 	N := len(validValues) - 1 // this is not a length, but distance from head to tail
 	p := float64(N) * location
@@ -260,6 +260,18 @@ func (arr NumpythonicFloatArray) div(value float64) NumpythonicFloatArray {
 }
 
 
+// Count returns the number of array's valid valies
+// "" is considered as invalid.
+func (arr NumpythonicStringArray) Count() int {
+	count := 0
+	for _, val := range arr {
+		if val != "" {
+			count++
+		}
+	}
+
+	return count
+}
 
 // Counter returns array's each elemnts' frequencey
 func (arr NumpythonicStringArray) Counter() map[string]int {

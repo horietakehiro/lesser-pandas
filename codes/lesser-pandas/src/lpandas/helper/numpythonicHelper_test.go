@@ -33,7 +33,7 @@ func TestNumpythonicFloatArray_Sum_invalid(t *testing.T) {
 
 
 func TestNumpythonicFloatArray_Max(t *testing.T) {
-	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN(), 100.01, 100}
+	arr := helper.NumpythonicFloatArray{math.Inf(0), 1,2,3,4,5, math.NaN(), 100.01, 100}
 	max := float64(100.01)
 
 	assert.Equal(t, max, arr.Max())
@@ -191,7 +191,12 @@ func TestNumpythonicFloatArray_Percentile_single(t *testing.T) {
 
 }
 
+func TestNumpythonicStringArray_Count(t *testing.T) {
+	arr := helper.NumpythonicStringArray{"", "1", "a", "", ""}
 
+	count := 2
+	assert.Equal(t, count, arr.Count())
+}
 
 func TestNumpythonicStringArray_Counter(t *testing.T) {
 	arr := helper.NumpythonicStringArray{"a", "", "b", "a", "b", "c"}
@@ -347,7 +352,7 @@ func TestNumpythonicFloatArray_Brodcast_invalid(t *testing.T) {
 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
 	broadcast := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
 
-	ret := arr.Broadcast("hoge", 0)
+	ret := arr.Broadcast("div", 0)
 	for i, val := range broadcast {
 		if math.IsInf(val, 0) || math.IsNaN(val) {
 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
