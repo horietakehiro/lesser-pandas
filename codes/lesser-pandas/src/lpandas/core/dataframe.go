@@ -1,4 +1,4 @@
-package lpandas
+package core
 
 import (
 	"fmt"
@@ -260,4 +260,12 @@ func (df *DataFrame) createStringStrResult(i int, metric string, result string) 
 		metric += ","
 	}
 	return metric
+}
+
+
+// Sum stdouts the DataFrame's each numeric columns's sum
+func (df *DataFrame) Sum() {
+	for _, col := range df.NumericColumns {
+		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Sum())
+	}
 }

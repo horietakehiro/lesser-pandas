@@ -1,41 +1,44 @@
-package lpandas_test
+package main_test
 
 import (
+	// "os/exec"
+	"flag"
 	"testing"
 	"github.com/stretchr/testify/assert"
 	// "github.com/golang/example/stringutil"
-
-	"lpandas"
+	"lpandas/main"
 )
 
-const filePath = "./test_datas/titanic-sample.csv"
+func TestSession_ParseArgs(t *testing.T) {
+	session := main.Session{}
+	args := map[string]string{
+		"file" : "../test_datas/titanic-sample.csv",
+		"method" : "info,describe",
+	}
+	for key, val := range args {
+		flag.CommandLine.Set(key, val)
+	}
+	session.ParseArgs()
 
-func TestDataFrame_ReadCsv(t *testing.T)  {
-	csvData := PrepareDataFrame4Test()
-
-	correctCsvDataNumericSahpe := []int{891, 7}
-	correctCsvDataStringSahpe := []int{891, 5}
-
-	numericColumns := []string{"PassengerId","Survived","Pclass", "Age", "SibSp", "Parch", "Fare"}
-	stringColumns := []string{"Name", "Sex", "Ticket", "Cabin", "Embarked"}
-
-	assert.ElementsMatch(t, correctCsvDataNumericSahpe, csvData.NumericShape,
-		"Expected csvData's Numericshape is %s but acutually %s", correctCsvDataNumericSahpe, csvData.NumericShape,
-	)
-	assert.ElementsMatch(t, correctCsvDataStringSahpe, csvData.StringShape,
-		"Expected csvData's Stringcshape is %s but acutually %s", correctCsvDataStringSahpe, csvData.StringShape,
-	)
-
-	assert.ElementsMatch(t, stringColumns, csvData.StringColumns)
-	assert.ElementsMatch(t, numericColumns, csvData.NumericColumns)
+	for key, val := range args {
+		assert.Equal(t, val, session.Args[key])	
+	}
 
 }
 
-func ExampleDataFrame_Info() {
-	csvData := PrepareDataFrame4Test()
-	
-	csvData.Info()
+
+func ExampleMain_multipleMethod() {
+	args := map[string]string{
+		"file" : "../test_datas/titanic-sample.csv",
+		"method" : "info,describe",
+	}
+	for key, val := range args {
+		flag.CommandLine.Set(key, val)
+	}
+	main.Main()
+
 	// Output:
+	// ========== df.Info() ==========
 	// RangeIndex: 891 entries, 0 to 890
 	// Data columns (total 12 columns):
 	// ===== Numeric columns (total 7 columns) =====
@@ -55,14 +58,8 @@ func ExampleDataFrame_Info() {
 	// Ticket,891,0,string
 	// Cabin,204,687,string
 	// Embarked,889,2,string
-	
-
-}
-
-func ExampleDataFrame_Describe() {
-	csvData := PrepareDataFrame4Test()
-	csvData.Describe()
-	// Output:
+	//
+	// ========== df.Describe() ==========
 	// === Numeric columns (total 7 columns) =====
 	// metric,PassengerId,Survived,Pclass,Age,SibSp,Parch,Fare
 	// count,891.000,891.000,891.000,714.000,891.000,891.000,891.000
@@ -81,12 +78,10 @@ func ExampleDataFrame_Describe() {
 	// unique,891,2,681,147,3  
 	// freq,1,577,7,4,644
 	// top,Abbing, Mr. Anthony,male,1601,B96 B98,S
+	//
+	
 
-}
 
-func PrepareDataFrame4Test() lpandas.DataFrame {
+	
 
-	csvData := lpandas.DataFrame{}
-	csvData.ReadCsv(filePath)
-	return csvData
 }
