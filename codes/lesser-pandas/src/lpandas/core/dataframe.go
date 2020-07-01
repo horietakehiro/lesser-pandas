@@ -269,3 +269,39 @@ func (df *DataFrame) Sum() {
 		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Sum())
 	}
 }
+
+// Mean stdouts the DataFrame's each numeric columns's mean
+func (df *DataFrame) Mean() {
+	for _, col := range df.NumericColumns {
+		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Mean())
+	}
+}
+
+
+// Min stdout the DataFrame's each numeric columns's min
+func (df *DataFrame) Min() {
+	for _, col := range df.NumericColumns {
+		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Min())
+	}
+}
+
+// Max stdout the DataFrame's each numeric columns's max
+func (df *DataFrame) Max() {
+	for _, col := range df.NumericColumns {
+		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Max())
+	}
+}
+
+// Std stdout the DataFrame's each numeric columns's std
+func (df *DataFrame) Std(nMinut1 bool) {
+	for _, col := range df.NumericColumns {
+		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Std(nMinut1))
+	}
+}
+
+// Percentile stdout the DataFrame's each numeric columns's percentile
+func (df *DataFrame) Percentile(location float64) {
+	for _, col := range df.NumericColumns {
+		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Percentile(location))
+	}
+}

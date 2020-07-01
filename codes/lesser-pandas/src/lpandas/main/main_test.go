@@ -79,9 +79,28 @@ func ExampleMain_multipleMethod() {
 	// freq,1,577,7,4,644
 	// top,Abbing, Mr. Anthony,male,1601,B96 B98,S
 	//
-	
+}
 
 
-	
+func ExampleMain_methodWithArgs() {
+	args := map[string]string{
+		"file" : "../test_datas/titanic-sample.csv",
+		"method" : "std.false",
+	}
+	for key, val := range args {
+		flag.CommandLine.Set(key, val)
+	}
+	main.Main()
+
+	// output:
+	// ========== df.Std(false) ==========
+	// PassengerId,257.209
+	// Survived,0.486
+	// Pclass,0.836
+	// Age,14.516
+	// SibSp,1.102
+	// Parch,0.806
+	// Fare,49.666
+	//
 
 }
