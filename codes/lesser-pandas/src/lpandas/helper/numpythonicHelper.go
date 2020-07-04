@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"fmt"
 	"sort"
 	"math"
 	"github.com/aclements/go-gg/generic/slice"
@@ -289,17 +290,18 @@ func (arr NumpythonicStringArray) Counter() map[string]int {
 
 
 // MostCommon returns the array's most common elements and its frequency, ordered by ascending.
-func (arr NumpythonicStringArray) MostCommon(n int) map[string]int {
-	mostCommon := map[string]int{}
+func (arr NumpythonicStringArray) MostCommon(n int) ([]string, []int) {
 
 	counter := arr.Counter()
-
-	if len(counter) == 0 {
-		return mostCommon
-	}
-
 	keys := make([]string, len(counter))
 	values := make([]int, len(counter))
+
+	if len(counter) == 0 {
+		return keys, values
+	}
+
+	retKeys := []string{}
+	retValues := []int{}
 
 	orderedKeys := make([]string, len(counter))
 	i := 0
@@ -320,9 +322,76 @@ func (arr NumpythonicStringArray) MostCommon(n int) map[string]int {
 			break
 		}
 		index := slice.ArgMax(values)
-		mostCommon[keys[index]] = values[index]
+		retKeys = append(retKeys, keys[index])
+		retValues = append(retValues, values[index])
+
 		values[index] = 0
 	}
 
-	return mostCommon
+	return retKeys, retValues
 }
+
+
+
+// Counter returns array's each elemnts' frequencey
+// float values are converted into string with precetion : 3.
+func (arr NumpythonicFloatArray) Counter() map[string]int {
+
+	stringArray := make(NumpythonicStringArray, len(arr))
+	for i, val := range arr {
+		if isValid(val) {
+			stringArray[i] = fmt.Sprintf("%.3f", val)
+		} else {
+			stringArray[i] = ""
+		}
+	}
+
+	counter := stringArray.Counter()
+
+	return counter
+}
+
+
+// MostCommon returns the array's most common elements and its frequency, ordered by ascending.
+// float values are converted into string with precision : 3.
+func (arr NumpythonicFloatArray) MostCommon(n int) ([]string, []int) {
+
+	counter := arr.Counter()
+	keys := make([]string, len(counter))
+	values := make([]int, len(counter))
+
+	if len(counter) == 0 {
+		return keys, values
+	}
+
+	retKeys := []string{}
+	retValues := []int{}
+
+	orderedKeys := make([]string, len(counter))
+	i := 0
+	for key := range counter {
+		orderedKeys[i] = key
+		i++
+	}
+	sort.Strings(orderedKeys)
+
+	for i, key := range orderedKeys {
+		keys[i] = key
+		values[i] = counter[key]
+	}
+
+	remain := len(counter)
+	for i := 0; i < n; i++ {
+		if i == remain {
+			break
+		}
+		index := slice.ArgMax(values)
+		retKeys = append(retKeys, keys[index])
+		retValues = append(retValues, values[index])
+
+		values[index] = 0
+	}
+
+	return retKeys, retValues
+}
+

@@ -232,46 +232,151 @@ func TestNumpythonicStringArray_Counter_invalid(t *testing.T) {
 func TestNumpythonicStringArray_MostCommon(t *testing.T) {
 	arr := helper.NumpythonicStringArray{"", "", "", "b", "c", "d", "a", "a", "b"}
 	
-	mostCommon := map[string]int{"a" : 2, "b" : 2, "c" : 1}
+	keys, values := []string{"a", "b", "c"}, []int{2, 2, 1}
+	// map[string]int{"a" : 2, "b" : 2, "c" : 1}
 
-	for key, val := range mostCommon {
-		assert.Equal(t, val, arr.MostCommon(3)[key])
+	k, v := arr.MostCommon(3)
+	for i := 0; i < len(keys); i++ {
+		assert.Equal(t, keys[i], k[i])
+		assert.Equal(t, values[i], v[i])
 	}
 }
 
 func TestNumpythonicStringArray_MostCommon_empty(t *testing.T) {
 	arr := helper.NumpythonicStringArray{}
 	
-	mostCommon := map[string]int{}
+	keys, values := []string{}, []int{}
 
-	assert.Equal(t, mostCommon, arr.MostCommon(3))
+	k, v := arr.MostCommon(3)
+	assert.Equal(t, keys, k)
+	assert.Equal(t, values, v)
+
 }
 
 func TestNumpythonicStringArray_MostCommon_invalid(t *testing.T) {
 	arr := helper.NumpythonicStringArray{"", ""}
 	
-	mostCommon := map[string]int{}
+	keys, values := []string{}, []int{}
 
-	assert.Equal(t, mostCommon, arr.MostCommon(3))
+	k, v := arr.MostCommon(3)
+	assert.Equal(t, keys, k)
+	assert.Equal(t, values, v)
 }
 
 func TestNumpythonicStringArray_MostCommon_overRequest(t *testing.T) {
 	arr := helper.NumpythonicStringArray{"", "", "", "b", "c", "d", "a", "a", "b"}
-	mostCommon := map[string]int{
-		"a" : 2, "b" : 2, "c" : 1, "d" : 1, 
-	}
+	// mostCommon := map[string]int{
+	// 	"a" : 2, "b" : 2, "c" : 1, "d" : 1, 
+	// }
+	keys, values := []string{"a", "b", "c", "d"}, []int{2, 2, 1, 1}
 
-	for key, val := range mostCommon {
-		assert.Equal(t, val, arr.MostCommon(10)[key])
+	k, v := arr.MostCommon(10)
+	for i := 0; i < len(keys); i++ {
+		assert.Equal(t, keys[i], k[i])
+		assert.Equal(t, values[i], v[i])
 	}
 }
 
 func TestNumpythonicStringArray_MostCommon_underRequest(t *testing.T) {
 	arr := helper.NumpythonicStringArray{"", "", "", "b", "c", "d", "a", "a", "b"}
-	mostCommon := map[string]int{"a" : 2,}
+	// mostCommon := map[string]int{"a" : 2,}
+	keys, values := []string{"a"}, []int{2}
 
-	for key, val := range mostCommon {
-		assert.Equal(t, val, arr.MostCommon(1)[key])
+	k, v := arr.MostCommon(1)
+	for i := 0; i < len(keys); i++ {
+		assert.Equal(t, keys[i], k[i])
+		assert.Equal(t, values[i], v[i])
+	}
+}
+
+
+func TestNumpythonicFloatArray_Counter(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{math.Inf(0), math.NaN(),math.NaN(), math.NaN() ,10.1, 10.1001, 10}
+
+	counter := map[string]int{
+		"10.100" : 2, "10.000" : 1, 
+	}
+
+	for key, val := range counter {
+		assert.Equal(t, val, arr.Counter()[key])
+	}
+
+}
+
+func TestNumpythonicFloatArray_Counter_empty(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{}
+
+	counter := map[string]int{}
+
+	assert.Equal(t, counter, arr.Counter())
+
+}
+
+func TestNumpythonicFloatArray_Counter_invalid(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{math.Inf(0), math.NaN()}
+
+	counter := map[string]int{}
+
+	assert.Equal(t, counter, arr.Counter())
+
+}
+
+func TestNumpythonicFloatArray_MostCommon(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{math.Inf(0), math.NaN(),math.NaN(), math.NaN() ,10.1, 10.1001, 10}
+	
+	keys, values := []string{"10.100"}, []int{2}
+
+	k, v := arr.MostCommon(3)
+	for i := 0; i < len(keys); i++ {
+		assert.Equal(t, keys[i], k[i])
+		assert.Equal(t, values[i], v[i])
+	}
+}
+
+func TestNumpythonicFloatArray_MostCommon_empty(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{}
+	
+	keys, values := []string{}, []int{}
+
+	k, v := arr.MostCommon(3)
+	assert.Equal(t, keys, k)
+	assert.Equal(t, values, v)
+
+}
+
+func TestNumpythonicFloatArray_MostCommon_invalid(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{math.Inf(0), math.NaN()}
+	
+	keys, values := []string{}, []int{}
+
+	k, v := arr.MostCommon(3)
+	assert.Equal(t, keys, k)
+	assert.Equal(t, values, v)
+}
+
+func TestNumpythonicFloatArray_MostCommon_overRequest(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{10, 10, 10, 0.1, 0.1}
+	// mostCommon := map[string]int{
+	// 	"a" : 2, "b" : 2, "c" : 1, "d" : 1, 
+	// }
+	keys, values := []string{"10.000", "0.100"}, []int{3, 2}
+
+	k, v := arr.MostCommon(10)
+	for i := 0; i < len(keys); i++ {
+		assert.Equal(t, keys[i], k[i])
+		assert.Equal(t, values[i], v[i])
+	}
+}
+
+func TestNumpythonicFloatArray_MostCommon_underRequest(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{10, 10, 10, 0.1, 0.1}
+	// mostCommon := map[string]int{"a" : 2,}
+	keys, values := []string{"10.000"}, []int{3}
+
+	k, v := arr.MostCommon(1)
+	for i := 0; i < len(keys); i++ {
+		assert.Equal(t, keys[i], k[i])
+		assert.Equal(t, values[i], v[i])
 	}
 }
 

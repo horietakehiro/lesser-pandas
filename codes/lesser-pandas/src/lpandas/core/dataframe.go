@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"os"
 	"encoding/csv"
-	"strconv"
-	// "reflect"
-	// "strings"
 	"math"
 	"io"
 
@@ -14,13 +11,6 @@ import (
 )
 
 
-// Series wraps the array-like objects and add some metadatas.
-type Series struct {
-	Dtype string
-	Values interface{} // Values store the Values with various Dtypes
-	Name string
-	Index []string
-}
 // DataFrame consists of the set of serieses.
 type DataFrame struct {
 	Columns []string // for keeping the originam order
@@ -100,52 +90,139 @@ func (df *DataFrame) ReadCsv(filePath string) {
 
 }
 
-// convert the series into either NumpythonicStringArray or NumpythonicFloatArray
-func (sr Series) asNumpythonicType() Series {
-	var newSeries Series
-	var floatArray helper.NumpythonicFloatArray
-	stringArray, ok := sr.Values.([]string)
-	if ok {
-		floatArray = make(helper.NumpythonicFloatArray, len(stringArray))
-	}
-	stringFlag := false
-	for i, val := range stringArray {
-		if val == "" {
-			floatArray[i] = math.NaN()
-			continue
-		}
-		
-		float, err := strconv.ParseFloat(val, 64)
-		if err != nil {
-			stringFlag = true
-			break
-		}
-		floatArray[i] = float
-	}
 
-	if stringFlag {
-		// convert []string into helper.NumpythonicStringArray
-		newStringArray := make(helper.NumpythonicStringArray, len(stringArray))
-		for i, val := range stringArray {
-			newStringArray[i] = val
+// Count returns the number of valid values of each dataframe's columns as a Series 
+func (df DataFrame) Count() (Series) {
+	retSeries := Series{
+		Name : "count", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicFloatArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicStringArray); ok {
+				values[i] = float64(tmpValues.Count())
+			}
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				values[i] = float64(tmpValues.Count())
+			}
 		}
-		newSeries = Series{
-			Name : sr.Name, 
-			Index : sr.Index, 
-			Dtype : "string", 
-			Values : newStringArray,
-		}
-	} else {
-		newSeries = Series{
-			Name : sr.Name, 
-			Index : sr.Index, 
-			Dtype : "float64", 
-			Values : floatArray,
-		}	
 	}
-	return newSeries
+	retSeries.Values = values
+
+	return retSeries
 }
 
+
+// Mean returns the mean values of each dataframe's columns as a Series 
+// columns with string dtype returns the math.NaN()
+func (df DataFrame) Mean() (Series) {
+	retSeries := Series{
+		Name : "mean", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicFloatArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			values[i] = math.NaN()
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				values[i] = tmpValues.Mean()
+			}
+		}
+	}
+	retSeries.Values = values
+
+	return retSeries
+}
+
+
+// Std returns the std values of each dataframe's columns as a Series 
+// columns with string dtype returns the math.NaN()
+func (df DataFrame) Std(nMinus1 bool) (Series) {
+	retSeries := Series{
+		Name : "std", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicFloatArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			values[i] = math.NaN()
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				values[i] = tmpValues.Std(nMinus1)
+			}
+		}
+	}
+	retSeries.Values = values
+
+	return retSeries
+}
+
+
+// Min returns the min values of each dataframe's columns as a Series 
+// columns with string dtype returns the math.NaN()
+func (df DataFrame) Min() (Series) {
+	retSeries := Series{
+		Name : "min", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicFloatArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			values[i] = math.NaN()
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				values[i] = tmpValues.Min()
+			}
+		}
+	}
+	retSeries.Values = values
+
+	return retSeries
+}
+
+
+// Percentile returns the percentile values, where specified with 'location',  of each dataframe's columns as a Series 
+// columns with string dtype returns the math.NaN()
+func (df DataFrame) Percentile(location float64) (Series) {
+	retSeries := Series{
+		Name : fmt.Sprintf("%.1f%%", 100.0 * location), Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicFloatArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			values[i] = math.NaN()
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				values[i] = tmpValues.Percentile(location)
+			}
+		}
+	}
+	retSeries.Values = values
+
+	return retSeries
+}
+
+
+
+// Max returns the max values of each dataframe's columns as a Series 
+// columns with string dtype returns the math.NaN()
+func (df DataFrame) Max() (Series) {
+	retSeries := Series{
+		Name : "max", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicFloatArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			values[i] = math.NaN()
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				values[i] = tmpValues.Max()
+			}
+		}
+	}
+	retSeries.Values = values
+
+	return retSeries
+}
 
 // Sum returns the sum values of each dataframe's columns as a Series 
 // columns with string dtype returns the math.NaN()
@@ -160,6 +237,82 @@ func (df DataFrame) Sum() (Series) {
 		} else {
 			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
 				values[i] = tmpValues.Sum()
+			}
+		}
+	}
+	retSeries.Values = values
+
+	return retSeries
+}
+
+
+
+// Unique returns the number of unique values of each dataframe's columns as a Series 
+func (df DataFrame) Unique() (Series) {
+	retSeries := Series{
+		Name : "unique", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicFloatArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicStringArray); ok {
+				counter := tmpValues.Counter()
+				values[i] = float64(len(counter))
+			}
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				counter := tmpValues.Counter()
+				values[i] = float64(len(counter))
+			}
+		}
+	}
+	retSeries.Values = values
+
+	return retSeries
+}
+
+
+// Freq returns the number of most common values's frequency of each dataframe's columns as a Series 
+func (df DataFrame) Freq() (Series) {
+	retSeries := Series{
+		Name : "freq", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicFloatArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicStringArray); ok {
+				_, val := tmpValues.MostCommon(1)
+				values[i] = float64(val[0])
+			}
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				_, val := tmpValues.MostCommon(1)
+				values[i] = float64(val[0])
+			}
+		}
+	}
+	retSeries.Values = values
+
+	return retSeries
+}
+
+
+// Top returns the number of most common values of each dataframe's columns as a Series 
+func (df DataFrame) Top() (Series) {
+	retSeries := Series{
+		Name : "top", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+	values := make(helper.NumpythonicStringArray, df.Shape[1])
+	for i, col := range df.Columns {
+		retSeries.Index[i] = col
+		if df.Values[col].Dtype == "string" {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicStringArray); ok {
+				key, _ := tmpValues.MostCommon(1)
+				values[i] = key[0]
+			}
+		} else {
+			if tmpValues, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+				key, _ := tmpValues.MostCommon(1)
+				values[i] = key[0]
 			}
 		}
 	}
@@ -209,6 +362,67 @@ func (df DataFrame) Info() DataFrame {
 
 	return retDf
 }
+
+
+// // Describe returns the basic statistical information of each df's columns as a DataFrame
+// // returned metrics are : "count", "mean", "std", "min","25.0%", "50.0%", "75.0%", "max","sum", "unique", "freq", "top"
+// func (df DataFrame) Describe() DataFrame {
+// 	retDf := DataFrame{
+// 		Columns : []string{"count", "mean", "std", "min",
+// 							"25.0%", "50.0%", "75.0%", "max",
+// 							"sum", "unique", "freq", "top"},
+// 		Index : df.Columns,
+// 		Values : map[string]*Series{}, 
+// 	}
+// 	count := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	mean := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	std := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	min := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	count := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	count := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	count := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	count := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	count := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	count := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	count := make(helper.NumpythonicFloatArray, len(df.Columns))
+
+// 	nullValues := make(helper.NumpythonicFloatArray, len(df.Columns))
+// 	dtypeValues := make(helper.NumpythonicStringArray, len(df.Columns))
+
+
+// 	for i, col := range df.Columns {
+// 		if df.Values[col].Dtype == "string" {
+// 			df.Values[col]
+// 			// if asserted, ok := df.Values[col].Values.(helper.NumpythonicStringArray); ok {
+// 			// 	nonNullValues[i] = float64(asserted.Count())
+// 			// 	nullValues[i] = float64(len(asserted)) - nonNullValues[i]
+// 			// 	dtypeValues[i] = df.Values[col].Dtype
+// 			// }
+// 		} else if df.Values[col].Dtype == "float64" {
+// 			if asserted, ok := df.Values[col].Values.(helper.NumpythonicFloatArray); ok {
+// 				nonNullValues[i] = float64(asserted.Count())
+// 				nullValues[i] = float64(len(asserted)) - nonNullValues[i]
+// 				dtypeValues[i] = df.Values[col].Dtype
+// 			}
+// 		}
+// 	}
+
+// 	retDf.Values["non-null"] = &Series{
+// 		Name : "non-null", Index : retDf.Index, Dtype : "float64", Values : nonNullValues,
+// 	}
+// 	retDf.Values["null"] = &Series{
+// 		Name : "null", Index : retDf.Index, Dtype : "float64", Values : nullValues,
+// 	}
+// 	retDf.Values["dtype"] = &Series{
+// 		Name : "dtype", Index : retDf.Index, Dtype : "string", Values : dtypeValues,
+// 	}
+
+// 	retDf.GetShape()
+
+// 	return retDf
+// }
+
+
 
 // func convertDtype(sr Series) Series {
 
