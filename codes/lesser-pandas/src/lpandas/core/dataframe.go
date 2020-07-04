@@ -13,20 +13,33 @@ import (
 )
 
 
-
-// DataFrame is a struct for storing structured data, like csv.
-// DataFrame has two types of columns and rows : Numeric / String
-type DataFrame struct {
-
-	Numeric map[string]helper.NumpythonicFloatArray
-	NumericColumns []string
-	NumericShape [2]int
-
-	String map[string]helper.NumpythonicStringArray
-	StringColumns []string
-	StringShape [2]int
-	
+type Series struct {
+	dtype string
+	values interface{}
+	name string
+	index []string
 }
+
+type DataFrame struct {
+	columns []string // for ordering output
+	index []string // for ordering output
+	values map[string]*Series
+}
+
+
+// // DataFrame is a struct for storing structured data, like csv.
+// // DataFrame has two types of columns and rows : Numeric / String
+// type DataFrame struct {
+
+// 	Numeric map[string]helper.NumpythonicFloatArray
+// 	NumericColumns []string
+// 	NumericShape [2]int
+
+// 	String map[string]helper.NumpythonicStringArray
+// 	StringColumns []string
+// 	StringShape [2]int
+	
+// }
 
 // GetShape get the dataframe's shape [r, c]
 func (df *DataFrame) GetShape() {
@@ -59,6 +72,8 @@ func (df *DataFrame) ReadCsv(filePath string) {
 	if err != nil {
 		panic(err)
 	}
+
+
 
 	// initiate maps for suppress "assignment to entry in nil map" error
 	df.Numeric = map[string]helper.NumpythonicFloatArray{}
@@ -151,7 +166,6 @@ func (df *DataFrame) Info() {
 			df.NumericShape[0] - validCount, 
 			reflect.TypeOf(df.Numeric[key][0]))
 	}
-	
 	fmt.Println("")
 
 	// String
@@ -203,7 +217,6 @@ func (df *DataFrame) Describe() {
 		thirdQuartile = df.createNumericResult(i, thirdQuartile, df.Numeric[col].Percentile(0.75))
 		max = df.createNumericResult(i, max, df.Numeric[col].Max())
 		sum = df.createNumericResult(i, sum, df.Numeric[col].Sum())
-		
 	}
 	fmt.Println(count)
 	fmt.Println(mean)
@@ -264,44 +277,56 @@ func (df *DataFrame) createStringStrResult(i int, metric string, result string) 
 
 
 // Sum stdouts the DataFrame's each numeric columns's sum
-func (df *DataFrame) Sum() {
+func (df *DataFrame) Sum() string {
+	ret := ""
 	for _, col := range df.NumericColumns {
-		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Sum())
+		ret += fmt.Sprintf("%s,%.3f\n", col, df.Numeric[col].Sum())
 	}
+	return ret
 }
 
 // Mean stdouts the DataFrame's each numeric columns's mean
-func (df *DataFrame) Mean() {
+func (df *DataFrame) Mean() string{
+	ret := ""
 	for _, col := range df.NumericColumns {
-		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Mean())
+		ret += fmt.Sprintf("%s,%.3f\n", col, df.Numeric[col].Mean())
 	}
+	return ret
 }
 
 
 // Min stdout the DataFrame's each numeric columns's min
-func (df *DataFrame) Min() {
+func (df *DataFrame) Min() string {
+	ret := ""
 	for _, col := range df.NumericColumns {
-		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Min())
+		ret += fmt.Sprintf("%s,%.3f\n", col, df.Numeric[col].Min())
 	}
+	return ret
 }
 
 // Max stdout the DataFrame's each numeric columns's max
-func (df *DataFrame) Max() {
+func (df *DataFrame) Max() string {
+	ret := ""
 	for _, col := range df.NumericColumns {
-		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Max())
+		ret += fmt.Sprintf("%s,%.3f\n", col, df.Numeric[col].Max())
 	}
+	return ret
 }
 
 // Std stdout the DataFrame's each numeric columns's std
-func (df *DataFrame) Std(nMinut1 bool) {
+func (df *DataFrame) Std(nMinut1 bool) string {
+	ret := ""
 	for _, col := range df.NumericColumns {
-		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Std(nMinut1))
+		ret += fmt.Sprintf("%s,%.3f\n", col, df.Numeric[col].Std(nMinut1))
 	}
+	return ret
 }
 
 // Percentile stdout the DataFrame's each numeric columns's percentile
-func (df *DataFrame) Percentile(location float64) {
+func (df *DataFrame) Percentile(location float64) string {
+	ret := ""
 	for _, col := range df.NumericColumns {
-		fmt.Printf("%s,%.3f\n", col, df.Numeric[col].Percentile(location))
+		ret += fmt.Sprintf("%s,%.3f\n", col, df.Numeric[col].Percentile(location))
 	}
+	return ret
 }

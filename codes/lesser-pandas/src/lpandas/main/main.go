@@ -17,6 +17,7 @@ type Session struct {
 
 var (
 	argFile = flag.String("file", "", "file to to be read")
+	argFormat = flag.String("format", "csv", "stdout format : csv|pretty")
 	argMethod = flag.String("method", "info", "method to be executed")
 )
 
@@ -45,25 +46,26 @@ func main() {
 func execMethod(df core.DataFrame, method string) {
 	args := strings.Split(method, ".")
 	method = args[0]
+	var ret string
 	switch method {
 	case "info":
 		fmt.Println("========== df.Info() ==========")
-		df.Info()
+		ret = df.Info()
 	case "describe":
 		fmt.Println("========== df.Describe() ==========")
-		df.Describe()
+		ret = df.Describe()
 	case "sum":
 		fmt.Println("========== df.Sum() ==========")
-		df.Sum()
+		ret = df.Sum()
 	case "mean":
 		fmt.Println("========== df.Mean() ==========")
-		df.Mean()
+		ret = df.Mean()
 	case "min":
 		fmt.Println("========== df.Min() ==========")
-		df.Min()
+		ret = df.Min()
 	case "max":
 		fmt.Println("========== df.Max() ==========")
-		df.Max()
+		ret = df.Max()
 	case "std":
 		var nMinus1 bool
 		var err error
@@ -76,7 +78,7 @@ func execMethod(df core.DataFrame, method string) {
 			nMinus1 = true
 		}
 		fmt.Printf("========== df.Std(%s) ==========\n", strconv.FormatBool(nMinus1))
-		df.Std(nMinus1)
+		ret = df.Std(nMinus1)
 	case "percentile":
 		var location float64
 		var err error
@@ -89,10 +91,8 @@ func execMethod(df core.DataFrame, method string) {
 			location = 0.5
 		}
 		fmt.Printf("========== df.Percentile(%.3f) ==========\n", location)
-		df.Percentile(location)
+		ret = df.Percentile(location)
 	}
-
-
 
 	fmt.Println("")
 }

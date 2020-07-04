@@ -16,6 +16,7 @@ type NumpythonicStringArray []string
 
 
 func isValid(val float64) bool {
+
 	return !math.IsInf(val, 0) && !math.IsNaN(val)
 }
 
