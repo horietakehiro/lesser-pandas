@@ -13,8 +13,10 @@ func main() {
 
 	df.ReadCsv(filePath)
 
-	fmt.Println(df.Info())
-	fmt.Println(df.Info().Values["non-null"])
+
+	// fmt.Println(df.Values["PassengerId"])
+	fmt.Println(df.Values["PassengerId"].Info())
+	// fmt.Println(df.Info().Values["non-null"])
 
 
 }

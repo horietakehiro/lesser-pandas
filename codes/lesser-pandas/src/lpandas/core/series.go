@@ -2,7 +2,7 @@ package core
 
 
 import (
-	// "fmt"
+	"fmt"
 	"strconv"
 	"math"
 
@@ -68,11 +68,12 @@ func (sr Series) asNumpythonicType() Series {
 
 
 // Count returns the number of valid values in the series.
-// if the dtype of series is string, returns math.NaN()
 func (sr Series) Count() float64 {
 	var count float64
 	if sr.Dtype == "string" {
-		return math.NaN()
+		if values, ok := sr.Values.(helper.NumpythonicStringArray); ok {
+			count = float64(values.Count())
+		}
 	}
 
 	if sr.Dtype == "float64" {
@@ -82,4 +83,205 @@ func (sr Series) Count() float64 {
 	}
 
 	return count
+}
+
+
+// Mean returns the mean of the series.
+func (sr Series) Mean() float64 {
+	var mean float64
+	if sr.Dtype == "string" {
+		mean = math.NaN()
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			mean = values.Mean()
+		}
+	}
+
+	return mean
+}
+
+
+
+// Std returns the std of the series.
+func (sr Series) Std(nMinus1 bool) float64 {
+	var std float64
+	if sr.Dtype == "string" {
+		std = math.NaN()
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			std = values.Std(nMinus1)
+		}
+	}
+
+	return std
+}
+
+
+// Min returns the min of the series.
+func (sr Series) Min() float64 {
+	var min float64
+	if sr.Dtype == "string" {
+		min = math.NaN()
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			min = values.Min()
+		}
+	}
+
+	return min
+}
+
+
+
+// Percentile returns the percentile at the specified location of the series.
+func (sr Series) Percentile(location float64) float64 {
+	var percentile float64
+
+	if sr.Dtype == "string" {
+		percentile = math.NaN()
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			percentile = values.Percentile(location)
+		}
+	}
+
+	return percentile
+}
+
+
+// Max returns the max of the series.
+func (sr Series) Max() float64 {
+	var max float64
+	if sr.Dtype == "string" {
+		max = math.NaN()
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			max = values.Max()
+		}
+	}
+
+	return max
+}
+
+// Sum returns the sum of the series.
+func (sr Series) Sum() float64 {
+	var sum float64
+	if sr.Dtype == "string" {
+		sum = math.NaN()
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			sum = values.Sum()
+		}
+	}
+
+	return sum
+}
+
+
+// Unique returns the number of unique values of the series.
+func (sr Series) Unique() float64 {
+	var unique float64
+	var counter map[string]int
+	if sr.Dtype == "string" {
+		if values, ok := sr.Values.(helper.NumpythonicStringArray); ok {
+			counter = values.Counter()
+		}
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			counter = values.Counter()
+		}
+	}
+	unique = float64(len(counter))
+
+	return unique
+}
+
+
+
+// Freq returns the most common values' frequency of the series.
+func (sr Series) Freq() float64 {
+	var freq float64
+	if sr.Dtype == "string" {
+		if values, ok := sr.Values.(helper.NumpythonicStringArray); ok {
+			_, val := values.MostCommon(1)
+			freq = float64(val[0])
+		}
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			_, val := values.MostCommon(1)
+			freq = float64(val[0])
+		}
+	}
+
+	return freq
+}
+
+
+// Top returns the most common values of the series.
+func (sr Series) Top() string {
+	var top string
+	if sr.Dtype == "string" {
+		if values, ok := sr.Values.(helper.NumpythonicStringArray); ok {
+			keys, _ := values.MostCommon(1)
+			top = keys[0]
+		}
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			keys, _ := values.MostCommon(1)
+			top = keys[0]
+		}
+	}
+
+	return top
+}
+
+
+// Info returns the number of non-null values, null values, and the dtype of the series
+func (sr Series) Info() Series {
+	var nonNull float64
+	var null float64
+	var dtype = "string"
+	newSeries := Series{
+		Name : sr.Name, Index : []string{"non-null", "null", "dtype"},
+		Dtype : "string", 
+	}
+	if sr.Dtype == "string" {
+		if values, ok := sr.Values.(helper.NumpythonicStringArray); ok {
+			nonNull = float64(values.Count())
+			null = float64(len(values)) - nonNull
+		}
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			nonNull = float64(values.Count())
+			null = float64(len(values)) - nonNull
+		}
+	}
+
+	stringArray := helper.NumpythonicStringArray{
+		fmt.Sprintf("%.3f", nonNull), fmt.Sprintf("%.3f", null), dtype, 
+	}
+
+	newSeries.Values = stringArray
+	
+	return newSeries
 }
