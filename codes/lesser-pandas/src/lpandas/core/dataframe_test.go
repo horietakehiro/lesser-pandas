@@ -369,66 +369,80 @@ func TestDataFrame_Info(t *testing.T) {
 	}
 }
 
-// func TestDataFrame_Describe(t *testing.T) {
-// 	columns := []string{"count", "mean", "std", "min",
-// 						 "25.0%", "50.0%", "75.0%", "max",
-// 						  "sum", "unique", "freq", "top"}
-// 	index := correctColumns
-// 	shape := []int{12, 12}
+func TestDataFrame_Describe(t *testing.T) {
+	columns := []string{"count", "mean", "std", "min",
+						 "25.0%", "50.0%", "75.0%", "max",
+						  "sum", "unique", "freq", "top"}
+	index := correctColumns
+	shape := []int{12, 12}
 
-// 	df := PrepareDataFrame4Test()
-// 	describe := df.Describe()
+	df := PrepareDataFrame4Test()
+	describe := df.Describe()
 
-// 	assert.ElementsMatch(t, correctColumns, describe.Columns)
-// 	assert.ElementsMatch(t, index , describe.Index)
-// 	assert.ElementsMatch(t, shape, describe.Shape)
+	assert.ElementsMatch(t, columns, describe.Columns)
+	assert.ElementsMatch(t, index , describe.Index)
+	assert.ElementsMatch(t, shape, describe.Shape)
 
+	for _, col := range describe.Columns {
+		switch col {
+		case "count":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctCount, retValues)
+		case "mean":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctMean, retValues)
+		case "std":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctStd, retValues)
+		case "min":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctMin, retValues)
+		case "25.0%":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctFirstQuetaile, retValues)
+		case "50.0%":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctMedian, retValues)
+		case "75.0%":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctThirdQuatile, retValues)
+		case "max":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctMax, retValues)
+		case "sum":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctSum, retValues)
+		case "unique":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctUnique, retValues)
+		case "freq":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
+			assertFloatArray(t, correctFreq, retValues)
+		case "top":
+			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
+			assertStringArray(t, correctTop, retValues)
+		default:
+			assert.Fail(t, "Invalid columns is in the returned DataFrame")
+		}
 
-// 	for _, col := range describe.Columns {
-// 		switch col {
-// 		case "count":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
-// 			assert.ElementsMatch(t, correctCount, retValues)
-// 		case "mean":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicFloatArray)
-// 			assert.ElementsMatch(t, correctMean, retValues)
-// 		case "std":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctStd, retValues)
-// 		case "min":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctMin, retValues)
-// 		case "25.0%":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctFirstQuetaile, retValues)
-// 		case "50.0%":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctMedian, retValues)
-// 		case "75.0%":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctThirdQuatile, retValues)
-// 		case "max":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctMax, retValues)
-// 		case "sum":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctSum, retValues)
-// 		case "unique":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctUnique, retValues)
-// 		case "freq":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythonicStringArray)
-// 			assert.ElementsMatch(t, correctFreq, retValues)
-// 		case "top":
-// 			retValues, _ := describe.Values[col].Values.(helper.NumpythocniStringArray)
-// 			assert.ElementsMatch(t, correctTop, retValues)
-// 		default:
-// 			assert.Fail(t, "Invalid columns is in the returned DataFrame")
-// 		}
-// 	}
-// }
+	}
+}
 
+func assertFloatArray(t *testing.T, correct, retValues helper.NumpythonicFloatArray) {
+	for i, val := range retValues {
+		if math.IsNaN(correct[i]) {
+			assert.True(t, math.IsNaN(val))
+		} else {
+			assert.Equal(t, fmt.Sprintf("%.3f", correct[i]), fmt.Sprintf("%.3f", val))
+		}
+	}
+}
 
+func assertStringArray(t *testing.T, correct, retValues helper.NumpythonicStringArray) {
+	for i, val := range retValues {
+		assert.Equal(t, correct[i], val)
+	}
+}
 
 
 func PrepareDataFrame4Test() core.DataFrame {

@@ -12,7 +12,6 @@ import (
 
 
 // use "PassangerId" and "Embarked" columns for this tests.
-
 const numeric = "PassengerId"
 const str = "Embarked"
 
@@ -259,13 +258,63 @@ func TestSeries_Info_string(t *testing.T) {
 }
 
 
-// func TestSeries_Top_string(t *testing.T) {
-// 	correct := "S"
-// 	sr := PrepareSeries4Test(str)
+func TestSeries_Describe_numeric(t *testing.T) {
+	correct := map[string]string{
+		"count" : "891.000", "mean" : "446.000", "std" : "257.209", "min" : "1.000",
+		"25.0%" : "223.500", "50.0%" : "446.000", "75.0%" : "668.500", "max" : "891.000",
+		"sum" : "397386.000", "unique" : "891.000", "freq" : "1.000", "top" : "1.000",
+	}
 	
-// 	assert.Equal(t, correct, sr.Top())
+	dtype := "string"
+	index := []string{
+		"count", "mean", "std", "min", 
+		"25.0%", "50.0%", "75.0%", "max",
+		"sum", "unique", "freq", "top",}
+	
+	name := numeric
 
-// }
+	sr := PrepareSeries4Test(numeric)
+	describe := sr.Describe()
+
+	assert.Equal(t, dtype, describe.Dtype)
+	assert.Equal(t, name, describe.Name)
+
+	values, _ := describe.Values.(helper.NumpythonicStringArray)
+	for i, col := range index {
+		assert.Equal(t, correct[col], values[i])
+	}
+}
+
+
+func TestSeries_Describe_string(t *testing.T) {
+	correct := map[string]string{
+		"count" : "889.000", "mean" : "", "std" : "", "min" : "",
+		"25.0%" : "", "50.0%" : "", "75.0%" : "", "max" : "",
+		"sum" : "", "unique" : "3.000", "freq" : "644.000", "top" : "S",
+	}
+	
+	dtype := "string"
+	index := []string{
+		"count", "mean", "std", "min", 
+		"25.0%", "50.0%", "75.0%", "max",
+		"sum", "unique", "freq", "top",}
+	
+	name := str
+
+	sr := PrepareSeries4Test(str)
+	describe := sr.Describe()
+
+	assert.Equal(t, dtype, describe.Dtype)
+	assert.Equal(t, name, describe.Name)
+
+	values, _ := describe.Values.(helper.NumpythonicStringArray)
+	for i, col := range index {
+		assert.Equal(t, correct[col], values[i])
+	}
+}
+
+
+
 
 
 func PrepareSeries4Test(col string) core.Series {

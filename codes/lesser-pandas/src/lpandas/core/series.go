@@ -255,6 +255,7 @@ func (sr Series) Top() string {
 
 
 // Info returns the number of non-null values, null values, and the dtype of the series
+// The returned series is dtype of string.
 func (sr Series) Info() Series {
 	var nonNull float64
 	var null float64
@@ -279,6 +280,67 @@ func (sr Series) Info() Series {
 
 	stringArray := helper.NumpythonicStringArray{
 		fmt.Sprintf("%.3f", nonNull), fmt.Sprintf("%.3f", null), dtype, 
+	}
+
+	newSeries.Values = stringArray
+	
+	return newSeries
+}
+
+
+
+// Describe returns the basic statistical values of the series
+// The returned series is dtype of string.
+func (sr Series) Describe() Series {
+
+	describe := map[string]string{
+		"count" : "", "mean" : "", "std" : "", "min" : "",
+		"25.0%" : "", "50.0%" : "", "75.0%" : "", "max" : "",
+		"sum" : "", "unique" : "", "freq" : "", "top" : "",
+	}
+	index := []string{
+		"count", "mean", "std", "min", 
+		"25.0%", "50.0%", "75.0%", "max",
+		"sum", "unique", "freq", "top",}
+	
+	newSeries := Series{
+		Name : sr.Name, Index : index,
+		Dtype : "string", 
+	}
+
+	if sr.Dtype == "string" {
+		if values, ok := sr.Values.(helper.NumpythonicStringArray); ok {
+			describe["count"] = fmt.Sprintf("%.3f", float64(values.Count()))
+			counter := values.Counter()
+			k, v := values.MostCommon(1)
+			describe["unique"] = fmt.Sprintf("%.3f", float64(len(counter)))
+			describe["freq"] = fmt.Sprintf("%.3f", float64(v[0]))
+			describe["top"] = fmt.Sprintf("%s", k[0])			
+		}
+	}
+
+	if sr.Dtype == "float64" {
+		if values, ok := sr.Values.(helper.NumpythonicFloatArray); ok {
+			describe["count"] = fmt.Sprintf("%.3f", float64(values.Count()))
+			describe["mean"] = fmt.Sprintf("%.3f", float64(values.Mean()))
+			describe["std"] = fmt.Sprintf("%.3f", float64(values.Std(false)))
+			describe["min"] = fmt.Sprintf("%.3f", float64(values.Min()))
+			describe["25.0%"] = fmt.Sprintf("%.3f", float64(values.Percentile(0.25)))
+			describe["50.0%"] = fmt.Sprintf("%.3f", float64(values.Percentile(0.5)))
+			describe["75.0%"] = fmt.Sprintf("%.3f", float64(values.Percentile(0.75)))
+			describe["max"] = fmt.Sprintf("%.3f", float64(values.Max()))
+			describe["sum"] = fmt.Sprintf("%.3f", float64(values.Sum()))
+			counter := values.Counter()
+			k, v := values.MostCommon(1)
+			describe["unique"] = fmt.Sprintf("%.3f", float64(len(counter)))
+			describe["freq"] = fmt.Sprintf("%.3f", float64(v[0]))
+			describe["top"] = fmt.Sprintf("%s", k[0])	
+		}
+	}
+
+	stringArray := make(helper.NumpythonicStringArray, len(index))
+	for i, val := range index {
+		stringArray[i] = describe[val]
 	}
 
 	newSeries.Values = stringArray
