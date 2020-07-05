@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"math"
 	"io"
+	"strings"
 
 	"lpandas/helper"
 )
@@ -394,3 +395,66 @@ func (df DataFrame) Describe() DataFrame {
 	return retDf
 }
 
+// Display displays the DataFrame with given format(csv|pretty)
+func (df DataFrame) Display(format string) {
+	switch format {
+	case "csv":
+		fmt.Printf("index,%s\n", strings.Join(df.Columns, ","))
+		for i := 0; i < len(df.Index); i++ {
+			var str string
+			for j, col := range df.Columns {
+				if df.Values[col].Dtype == "float64" {
+					values, _ := df.Values[col].Values.(helper.NumpythonicFloatArray)
+					str += fmt.Sprintf("%.3f" ,values[i])
+				}
+				if df.Values[col].Dtype == "string" {
+					values, _ := df.Values[col].Values.(helper.NumpythonicStringArray)
+					str += fmt.Sprintf("%s" ,values[i])
+				}
+				if j != len(df.Columns) - 1 {
+					str += ","
+				}
+			}
+			fmt.Printf("%s,%s\n", df.Index[i], str)
+		}
+
+	// case "pretty":
+	// 	index := make(helper.NumpythonicStringArray, len(sr.Index))
+	// 	for i, val := range sr.Index {
+	// 		index[i] = val
+	// 	}
+	// 	indexLength := index.MaxLen()
+	// 	var valuesLength int
+	// 	if sr.Dtype == "float64" {
+	// 		values, _ := sr.Values.(helper.NumpythonicFloatArray)
+	// 		valuesLength = values.MaxLen()
+	// 	}
+	// 	if sr.Dtype == "string" {
+	// 		values, _ := sr.Values.(helper.NumpythonicStringArray)
+	// 		valuesLength = values.MaxLen()
+	// 	}
+	// 	indexLength = int(math.Max(float64(indexLength), float64(len("index"))))
+	// 	valuesLength = int(math.Max(float64(valuesLength), float64(len(sr.Name))))
+	// 	fmt.Printf("%s | %s |\n", 
+	// 				helper.PadString("index", " ", indexLength), 
+	// 				helper.PadString(sr.Name, " ",  valuesLength))
+
+	// 	for i := 0; i < len(sr.Index); i++ {
+	// 		if sr.Dtype == "float64" {
+	// 			values, _ := sr.Values.(helper.NumpythonicFloatArray)
+	// 			fmt.Printf("%s | %s |\n", 
+	// 						helper.PadString(sr.Index[i], " ", indexLength), 
+	// 						helper.PadString(fmt.Sprintf("%.3f", values[i]), " ", valuesLength))
+	// 		}
+	// 		if sr.Dtype == "string" {
+	// 			values, _ := sr.Values.(helper.NumpythonicStringArray)
+	// 			fmt.Printf("%s | %s |\n", 
+	// 						helper.PadString(sr.Index[i], " ", indexLength), 
+	// 						helper.PadString(values[i], " ", valuesLength))
+	// 		}
+	// 	}
+
+	default:
+		fmt.Println(df)	
+	}
+}

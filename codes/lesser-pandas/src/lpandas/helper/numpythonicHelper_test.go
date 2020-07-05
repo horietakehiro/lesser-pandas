@@ -466,3 +466,16 @@ func TestNumpythonicFloatArray_Brodcast_invalid(t *testing.T) {
 		}
 	}
 }
+
+func TestNumpythonicFloatArray_MaxLen(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{10.0000000, 10000.000, math.NaN(), math.Inf(0)}
+	length := 9
+	assert.Equal(t, length, arr.MaxLen())
+}
+
+
+func TestNumpythonicStringArray_MaxLen(t *testing.T) {
+	arr := helper.NumpythonicStringArray{"01234", "", "012"}
+	length := 5
+	assert.Equal(t, length, arr.MaxLen())
+}

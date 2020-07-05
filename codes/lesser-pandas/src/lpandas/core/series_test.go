@@ -314,7 +314,30 @@ func TestSeries_Describe_string(t *testing.T) {
 }
 
 
+func ExampleSeries_Display_csv() {
+	sr := PrepareSeries4Test(str)
+	format := "csv"
+	sr.Info().Display(format)
+	// output:
+	// index,Embarked
+	// non-null,889.000
+	// null,2.000
+	// dtype,string
 
+}
+
+func ExampleSeries_Display_pretty() {
+	sr := PrepareSeries4Test(str)
+	format := "pretty"
+	sr.Info().Display(format)
+	// output:
+	// index    | Embarked |
+	// non-null | 889.000  |
+	// null     | 2.000    |
+	// dtype    | string   |
+	//
+
+}
 
 
 func PrepareSeries4Test(col string) core.Series {
@@ -324,4 +347,3 @@ func PrepareSeries4Test(col string) core.Series {
 	csvData.ReadCsv(filePath)
 	return *csvData.Values[col]
 }
-		

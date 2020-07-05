@@ -347,3 +347,60 @@ func (sr Series) Describe() Series {
 	
 	return newSeries
 }
+
+// Display displays the Series with given format (csv|pretty)
+func (sr Series) Display(format string) {
+	switch format {
+	case "csv":
+		fmt.Printf("index,%s\n", sr.Name)
+		for i := 0; i < len(sr.Index); i++ {
+			if sr.Dtype == "float64" {
+				values, _ := sr.Values.(helper.NumpythonicFloatArray)
+				fmt.Printf("%s,%.3f\n", sr.Index[i], values[i])
+			}
+			if sr.Dtype == "string" {
+				values, _ := sr.Values.(helper.NumpythonicStringArray)
+				fmt.Printf("%s,%s\n", sr.Index[i], values[i])
+			}
+		}
+	
+	case "pretty":
+		index := make(helper.NumpythonicStringArray, len(sr.Index))
+		for i, val := range sr.Index {
+			index[i] = val
+		}
+		indexLength := index.MaxLen()
+		var valuesLength int
+		if sr.Dtype == "float64" {
+			values, _ := sr.Values.(helper.NumpythonicFloatArray)
+			valuesLength = values.MaxLen()
+		}
+		if sr.Dtype == "string" {
+			values, _ := sr.Values.(helper.NumpythonicStringArray)
+			valuesLength = values.MaxLen()
+		}
+		indexLength = int(math.Max(float64(indexLength), float64(len("index"))))
+		valuesLength = int(math.Max(float64(valuesLength), float64(len(sr.Name))))
+		fmt.Printf("%s | %s |\n", 
+					helper.PadString("index", " ", indexLength), 
+					helper.PadString(sr.Name, " ",  valuesLength))
+
+		for i := 0; i < len(sr.Index); i++ {
+			if sr.Dtype == "float64" {
+				values, _ := sr.Values.(helper.NumpythonicFloatArray)
+				fmt.Printf("%s | %s |\n", 
+							helper.PadString(sr.Index[i], " ", indexLength), 
+							helper.PadString(fmt.Sprintf("%.3f", values[i]), " ", valuesLength))
+			}
+			if sr.Dtype == "string" {
+				values, _ := sr.Values.(helper.NumpythonicStringArray)
+				fmt.Printf("%s | %s |\n", 
+							helper.PadString(sr.Index[i], " ", indexLength), 
+							helper.PadString(values[i], " ", valuesLength))
+			}
+		}
+
+	default:
+		fmt.Println(sr)	
+	}
+}

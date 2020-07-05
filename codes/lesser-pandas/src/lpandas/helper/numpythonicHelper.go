@@ -395,3 +395,37 @@ func (arr NumpythonicFloatArray) MostCommon(n int) ([]string, []int) {
 	return retKeys, retValues
 }
 
+// MaxLen returns the maxLength of values
+func (arr NumpythonicFloatArray) MaxLen() int {
+	maxLen := 0
+	for i, val := range arr {
+		if !isValid(val) {
+			continue
+		}
+
+		length := len(fmt.Sprintf("%.3f", val))
+		if i == 0 {
+			maxLen = length
+		}
+		if maxLen < length {
+			maxLen = length
+		}
+	}
+	return maxLen
+}
+
+
+// MaxLen returns the maxLength of values
+func (arr NumpythonicStringArray) MaxLen() int {
+	maxLen := 0
+	for i, val := range arr {
+		length := len(val)
+		if i == 0 {
+			maxLen = length
+		}
+		if maxLen < length {
+			maxLen = length
+		}
+	}
+	return maxLen
+}

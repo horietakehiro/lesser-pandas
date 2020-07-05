@@ -428,6 +428,32 @@ func TestDataFrame_Describe(t *testing.T) {
 	}
 }
 
+
+func ExampleDataFrame_Display_csv() {
+	df := PrepareDataFrame4Test()
+	format := "csv"
+	df.Info().Display(format)
+	// output:
+	// index,non-null,null,dtype
+	// PassengerId,891.000,0.000,float64
+	// Survived,891.000,0.000,float64
+	// Pclass,891.000,0.000,float64
+	// Name,891.000,0.000,string
+	// Sex,891.000,0.000,string
+	// Age,714.000,177.000,float64
+	// SibSp,891.000,0.000,float64
+	// Parch,891.000,0.000,float64
+	// Ticket,891.000,0.000,string
+	// Fare,891.000,0.000,float64
+	// Cabin,204.000,687.000,string
+	// Embarked,889.000,2.000,string
+
+}
+
+
+
+
+
 func assertFloatArray(t *testing.T, correct, retValues helper.NumpythonicFloatArray) {
 	for i, val := range retValues {
 		if math.IsNaN(correct[i]) {
