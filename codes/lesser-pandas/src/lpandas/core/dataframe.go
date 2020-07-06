@@ -418,27 +418,54 @@ func (df DataFrame) Display(format string) {
 			fmt.Printf("%s,%s\n", df.Index[i], str)
 		}
 
-	// case "pretty":
-	// 	index := make(helper.NumpythonicStringArray, len(sr.Index))
-	// 	for i, val := range sr.Index {
-	// 		index[i] = val
-	// 	}
-	// 	indexLength := index.MaxLen()
-	// 	var valuesLength int
-	// 	if sr.Dtype == "float64" {
-	// 		values, _ := sr.Values.(helper.NumpythonicFloatArray)
-	// 		valuesLength = values.MaxLen()
-	// 	}
-	// 	if sr.Dtype == "string" {
-	// 		values, _ := sr.Values.(helper.NumpythonicStringArray)
-	// 		valuesLength = values.MaxLen()
-	// 	}
-	// 	indexLength = int(math.Max(float64(indexLength), float64(len("index"))))
-	// 	valuesLength = int(math.Max(float64(valuesLength), float64(len(sr.Name))))
-	// 	fmt.Printf("%s | %s |\n", 
-	// 				helper.PadString("index", " ", indexLength), 
-	// 				helper.PadString(sr.Name, " ",  valuesLength))
+	case "pretty":
+		index := make(helper.NumpythonicStringArray, len(df.Index))
+		for i, val := range df.Index {
+			index[i] = val
+		}
+		indexLength := index.MaxLen()
+		indexLength = int(math.Max(float64(indexLength), float64(len("index"))))
+	valuesLength := map[string]int{}
+	for _, col := range df.Columns {
+		valuesLength[col] = 0
+	}
+	for _, col := range df.Columns {
+		if df.Values[col].Dtype == "float64" {
+			values, _ := df.Values[col].Values.(helper.NumpythonicFloatArray)
+			valuesLength[col] = values.MaxLen()
+		}
+		if df.Values[col].Dtype == "string" {
+			values, _ := df.Values[col].Values.(helper.NumpythonicStringArray)
+			valuesLength[col] = values.MaxLen()
+		}
+		valuesLength[col] = int(math.Max(float64(valuesLength[col]), float64(len(df.Values[col].Name))))
+	}
 
+
+	header := make([]string, len(df.Columns) + 1)
+	header[0] = helper.PadString("index", " ", indexLength)
+	for i, col := range df.Columns {
+		header[i+1] = helper.PadString(col, " ", valuesLength[col])
+	}
+	fmt.Printf("%s |\n", strings.Join(header, " | "))
+	
+	for i := 0; i < len(df.Index); i++ {
+		fmtStrings := make([]string, len(df.Columns) + 1)
+		fmtStrings[0] = helper.PadString(df.Index[i], " ", indexLength)
+		for j, col := range df.Columns {
+			if df.Values[col].Dtype == "float64" {
+				values, _ :=  df.Values[col].Values.(helper.NumpythonicFloatArray)
+				fmtStrings[j+1] = helper.PadString(fmt.Sprintf("%.3f", values[i]), " ", valuesLength[col])
+			}
+			if df.Values[col].Dtype == "string" {
+				values, _ :=  df.Values[col].Values.(helper.NumpythonicStringArray)
+				fmtStrings[j+1] = helper.PadString(values[i], " ", valuesLength[col])
+			}
+		}
+		fmt.Printf("%s |\n", strings.Join(fmtStrings, " | "))
+
+		
+	}
 	// 	for i := 0; i < len(sr.Index); i++ {
 	// 		if sr.Dtype == "float64" {
 	// 			values, _ := sr.Values.(helper.NumpythonicFloatArray)

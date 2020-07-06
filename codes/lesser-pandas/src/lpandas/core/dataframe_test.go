@@ -450,6 +450,26 @@ func ExampleDataFrame_Display_csv() {
 
 }
 
+func ExampleDataFrame_Display_pretty() {
+	df := PrepareDataFrame4Test()
+	format := "pretty"
+	df.Info().Display(format)
+	// output:
+	// index       | non-null | null    | dtype   |
+	// PassengerId | 891.000  | 0.000   | float64 |
+	// Survived    | 891.000  | 0.000   | float64 |
+	// Pclass      | 891.000  | 0.000   | float64 |
+	// Name        | 891.000  | 0.000   | string  |
+	// Sex         | 891.000  | 0.000   | string  |
+	// Age         | 714.000  | 177.000 | float64 |
+	// SibSp       | 891.000  | 0.000   | float64 |
+	// Parch       | 891.000  | 0.000   | float64 |
+	// Ticket      | 891.000  | 0.000   | string  |
+	// Fare        | 891.000  | 0.000   | float64 |
+	// Cabin       | 204.000  | 687.000 | string  |
+	// Embarked    | 889.000  | 2.000   | string  |
+
+}
 
 
 
