@@ -301,7 +301,7 @@ func (df DataFrame) Freq() (Series) {
 // Top returns the number of most common values of each dataframe's columns as a Series 
 func (df DataFrame) Top() (Series) {
 	retSeries := Series{
-		Name : "top", Index : make([]string, df.Shape[1]), Dtype : "float64"}
+		Name : "top", Index : make([]string, df.Shape[1]), Dtype : "string"}
 	values := make(helper.NumpythonicStringArray, df.Shape[1])
 	for i, col := range df.Columns {
 		retSeries.Index[i] = col
@@ -425,61 +425,48 @@ func (df DataFrame) Display(format string) {
 		}
 		indexLength := index.MaxLen()
 		indexLength = int(math.Max(float64(indexLength), float64(len("index"))))
-	valuesLength := map[string]int{}
-	for _, col := range df.Columns {
-		valuesLength[col] = 0
-	}
-	for _, col := range df.Columns {
-		if df.Values[col].Dtype == "float64" {
-			values, _ := df.Values[col].Values.(helper.NumpythonicFloatArray)
-			valuesLength[col] = values.MaxLen()
+		valuesLength := map[string]int{}
+		for _, col := range df.Columns {
+			valuesLength[col] = 0
 		}
-		if df.Values[col].Dtype == "string" {
-			values, _ := df.Values[col].Values.(helper.NumpythonicStringArray)
-			valuesLength[col] = values.MaxLen()
-		}
-		valuesLength[col] = int(math.Max(float64(valuesLength[col]), float64(len(df.Values[col].Name))))
-	}
-
-
-	header := make([]string, len(df.Columns) + 1)
-	header[0] = helper.PadString("index", " ", indexLength)
-	for i, col := range df.Columns {
-		header[i+1] = helper.PadString(col, " ", valuesLength[col])
-	}
-	fmt.Printf("%s |\n", strings.Join(header, " | "))
-	
-	for i := 0; i < len(df.Index); i++ {
-		fmtStrings := make([]string, len(df.Columns) + 1)
-		fmtStrings[0] = helper.PadString(df.Index[i], " ", indexLength)
-		for j, col := range df.Columns {
+		for _, col := range df.Columns {
 			if df.Values[col].Dtype == "float64" {
-				values, _ :=  df.Values[col].Values.(helper.NumpythonicFloatArray)
-				fmtStrings[j+1] = helper.PadString(fmt.Sprintf("%.3f", values[i]), " ", valuesLength[col])
+				values, _ := df.Values[col].Values.(helper.NumpythonicFloatArray)
+				valuesLength[col] = values.MaxLen()
 			}
 			if df.Values[col].Dtype == "string" {
-				values, _ :=  df.Values[col].Values.(helper.NumpythonicStringArray)
-				fmtStrings[j+1] = helper.PadString(values[i], " ", valuesLength[col])
+				values, _ := df.Values[col].Values.(helper.NumpythonicStringArray)
+				valuesLength[col] = values.MaxLen()
 			}
+			valuesLength[col] = int(math.Max(float64(valuesLength[col]), float64(len(df.Values[col].Name))))
 		}
-		fmt.Printf("%s |\n", strings.Join(fmtStrings, " | "))
 
+
+		header := make([]string, len(df.Columns) + 1)
+		header[0] = helper.PadString("index", " ", indexLength)
+		for i, col := range df.Columns {
+			header[i+1] = helper.PadString(col, " ", valuesLength[col])
+		}
+		fmt.Printf("%s |\n", strings.Join(header, " | "))
 		
-	}
-	// 	for i := 0; i < len(sr.Index); i++ {
-	// 		if sr.Dtype == "float64" {
-	// 			values, _ := sr.Values.(helper.NumpythonicFloatArray)
-	// 			fmt.Printf("%s | %s |\n", 
-	// 						helper.PadString(sr.Index[i], " ", indexLength), 
-	// 						helper.PadString(fmt.Sprintf("%.3f", values[i]), " ", valuesLength))
-	// 		}
-	// 		if sr.Dtype == "string" {
-	// 			values, _ := sr.Values.(helper.NumpythonicStringArray)
-	// 			fmt.Printf("%s | %s |\n", 
-	// 						helper.PadString(sr.Index[i], " ", indexLength), 
-	// 						helper.PadString(values[i], " ", valuesLength))
-	// 		}
-	// 	}
+		
+		for i := 0; i < len(df.Index); i++ {
+			fmtStrings := make([]string, len(df.Columns) + 1)
+			fmtStrings[0] = helper.PadString(df.Index[i], " ", indexLength)
+			for j, col := range df.Columns {
+				if df.Values[col].Dtype == "float64" {
+					values, _ :=  df.Values[col].Values.(helper.NumpythonicFloatArray)
+					fmtStrings[j+1] = helper.PadString(fmt.Sprintf("%.3f", values[i]), " ", valuesLength[col])
+				}
+				if df.Values[col].Dtype == "string" {
+					values, _ :=  df.Values[col].Values.(helper.NumpythonicStringArray)
+					fmtStrings[j+1] = helper.PadString(values[i], " ", valuesLength[col])
+				}
+			}
+			fmt.Printf("%s |\n", strings.Join(fmtStrings, " | "))
+
+			
+		}
 
 	default:
 		fmt.Println(df)	
