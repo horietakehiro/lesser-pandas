@@ -5,6 +5,7 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"math"
+	"os"
 
 	"lpandas/helper"
 	"lpandas/core"
@@ -336,6 +337,26 @@ func ExampleSeries_Display_pretty() {
 	// null     | 2.000    |
 	// dtype    | string   |
 	//
+
+}
+
+func TestSeries_ToCsv_withIndex(t *testing.T) {
+	sr := PrepareSeries4Test(numeric)
+	info := sr.Info()
+
+	out := "./out.csv"
+	withIndex := true
+	info.ToCsv(out, withIndex)
+	defer os.Remove(out)
+
+	_, err := os.Stat(out)
+	assert.True(t, err == nil)
+
+	df := core.DataFrame{}
+	df.ReadCsv(out)
+	
+	assert.ElementsMatch(t, []string{"index", "PassengerId"}, df.Columns)
+
 
 }
 

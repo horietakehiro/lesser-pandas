@@ -380,92 +380,251 @@ func TestNumpythonicFloatArray_MostCommon_underRequest(t *testing.T) {
 	}
 }
 
-func TestNumpythonicFloatArray_Brodcast_add(t *testing.T) {
-	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
-	broadcast := helper.NumpythonicFloatArray{2,3,4,5,6, math.Inf(0), math.NaN()}
 
-	ret := arr.Broadcast("add", 1)
-	for i, val := range broadcast {
+func TestNumpythonicFloatArray_Add_Scalar(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+	added := helper.NumpythonicFloatArray{2,3,4,5,6, math.Inf(0), math.NaN()}
+	ret := arr.Add(float64(1))
+
+	for i, val := range added {
 		if math.IsInf(val, 0) || math.IsNaN(val) {
 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
 		} else {
 			assert.Equal(t, val, ret[i])
 		}
 	}
+
 }
-
-
-func TestNumpythonicFloatArray_Brodcast_sub(t *testing.T) {
+func TestNumpythonicFloatArray_Add_Vector(t *testing.T) {
 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
-	broadcast := helper.NumpythonicFloatArray{0,1,2,3,4, math.Inf(0), math.NaN()}
+	added := helper.NumpythonicFloatArray{2,4,6,8,10, math.Inf(0), math.NaN()}
+	ret := arr.Add(helper.NumpythonicFloatArray{1,2,3,4,5,6,7})
 
-	ret := arr.Broadcast("sub", 1)
-	for i, val := range broadcast {
+	for i, val := range added {
 		if math.IsInf(val, 0) || math.IsNaN(val) {
 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
 		} else {
 			assert.Equal(t, val, ret[i])
 		}
 	}
+
 }
 
 
-
-func TestNumpythonicFloatArray_Brodcast_mul(t *testing.T) {
+func TestNumpythonicFloatArray_Sub_Scalar(t *testing.T) {
 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
-	broadcast := helper.NumpythonicFloatArray{5,10,15,20,25, math.Inf(0), math.NaN()}
+	add := helper.NumpythonicFloatArray{0,1,2,3,4, math.Inf(0), math.NaN()}
+	ret := arr.Sub(float64(1))
 
-	ret := arr.Broadcast("mul", 5)
-	for i, val := range broadcast {
+	for i, val := range add {
 		if math.IsInf(val, 0) || math.IsNaN(val) {
 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
 		} else {
 			assert.Equal(t, val, ret[i])
 		}
 	}
+
 }
-
-func TestNumpythonicFloatArray_Brodcast_div(t *testing.T) {
+func TestNumpythonicFloatArray_Sub_Vector(t *testing.T) {
 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
-	broadcast := helper.NumpythonicFloatArray{0.5,1,1.5,2,2.5, math.Inf(0), math.NaN()}
+	sub := helper.NumpythonicFloatArray{0,0,0,0,0, math.Inf(0), math.NaN()}
+	ret := arr.Sub(helper.NumpythonicFloatArray{1,2,3,4,5,6,7})
 
-	ret := arr.Broadcast("div", 2)
-	for i, val := range broadcast {
+	for i, val := range sub {
 		if math.IsInf(val, 0) || math.IsNaN(val) {
 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
 		} else {
 			assert.Equal(t, val, ret[i])
 		}
 	}
+
 }
 
-func TestNumpythonicFloatArray_Brodcast_zeroDevide(t *testing.T) {
-	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
-	broadcast := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
 
-	ret := arr.Broadcast("div", 0)
-	for i, val := range broadcast {
+func TestNumpythonicFloatArray_Mul_Scalar(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+	mul := helper.NumpythonicFloatArray{10,20,30,40,50, math.Inf(0), math.NaN()}
+	ret := arr.Mul(float64(10))
+
+	for i, val := range mul {
 		if math.IsInf(val, 0) || math.IsNaN(val) {
 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
 		} else {
 			assert.Equal(t, val, ret[i])
 		}
 	}
+
 }
-
-func TestNumpythonicFloatArray_Brodcast_invalid(t *testing.T) {
+func TestNumpythonicFloatArray_Mul_Vector(t *testing.T) {
 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
-	broadcast := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+	mul := helper.NumpythonicFloatArray{1,4,9,16,25, math.Inf(0), math.NaN()}
+	ret := arr.Mul(helper.NumpythonicFloatArray{1,2,3,4,5,6,7})
 
-	ret := arr.Broadcast("div", 0)
-	for i, val := range broadcast {
+	for i, val := range mul {
 		if math.IsInf(val, 0) || math.IsNaN(val) {
 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
 		} else {
 			assert.Equal(t, val, ret[i])
 		}
 	}
+
 }
+
+
+
+func TestNumpythonicFloatArray_Div_Scalar(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+	div := helper.NumpythonicFloatArray{0.5,1,1.5,2,2.5, math.Inf(0), math.NaN()}
+	ret := arr.Div(float64(2))
+
+	for i, val := range div {
+		if math.IsInf(val, 0) || math.IsNaN(val) {
+			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+		} else {
+			assert.Equal(t, val, ret[i])
+		}
+	}
+
+}
+func TestNumpythonicFloatArray_Div_Vector(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+	div := helper.NumpythonicFloatArray{1,1,1,1,1, math.Inf(0), math.NaN()}
+	ret := arr.Div(helper.NumpythonicFloatArray{1,2,3,4,5,6,7})
+
+	for i, val := range div {
+		if math.IsInf(val, 0) || math.IsNaN(val) {
+			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+		} else {
+			assert.Equal(t, val, ret[i])
+		}
+	}
+
+}
+
+func TestNumpythonicFloatArray_Div_Zerodiveded(t *testing.T) {
+	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+	div := helper.NumpythonicFloatArray{math.Inf(0), math.Inf(0),math.Inf(0),math.Inf(0),math.Inf(0), math.Inf(0), math.Inf(0)}
+	ret := arr.Div(float64(0))
+
+	for i, val := range div {
+		if math.IsInf(val, 0) || math.IsNaN(val) {
+			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+		} else {
+			assert.Equal(t, val, ret[i])
+		}
+	}
+
+}
+
+
+func TestNumpythonicStringArray_Add_Single(t *testing.T) {
+	arr := helper.NumpythonicStringArray{"a", "b", "c", ""}
+	add := helper.NumpythonicStringArray{"aA", "bA", "cA", "A"}
+	ret := arr.Add("A")
+
+	for i, val := range add {
+		assert.Equal(t, val, ret[i])
+	}
+
+}
+
+func TestNumpythonicStringArray_Add_Vector(t *testing.T) {
+	arr := helper.NumpythonicStringArray{"a", "b", "c", ""}
+	add := helper.NumpythonicStringArray{"aA", "bB", "cC", ""}
+	ret := arr.Add(helper.NumpythonicStringArray{"A", "B", "C", ""})
+
+	for i, val := range add {
+		assert.Equal(t, val, ret[i])
+	}
+
+}
+
+// func TestNumpythonicFloatArray_Brodcast_add(t *testing.T) {
+// 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+// 	broadcast := helper.NumpythonicFloatArray{2,3,4,5,6, math.Inf(0), math.NaN()}
+
+// 	ret := arr.Broadcast("add", 1)
+// 	for i, val := range broadcast {
+// 		if math.IsInf(val, 0) || math.IsNaN(val) {
+// 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+// 		} else {
+// 			assert.Equal(t, val, ret[i])
+// 		}
+// 	}
+// }
+
+
+// func TestNumpythonicFloatArray_Brodcast_sub(t *testing.T) {
+// 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+// 	broadcast := helper.NumpythonicFloatArray{0,1,2,3,4, math.Inf(0), math.NaN()}
+
+// 	ret := arr.Broadcast("sub", 1)
+// 	for i, val := range broadcast {
+// 		if math.IsInf(val, 0) || math.IsNaN(val) {
+// 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+// 		} else {
+// 			assert.Equal(t, val, ret[i])
+// 		}
+// 	}
+// }
+
+
+
+// func TestNumpythonicFloatArray_Brodcast_mul(t *testing.T) {
+// 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+// 	broadcast := helper.NumpythonicFloatArray{5,10,15,20,25, math.Inf(0), math.NaN()}
+
+// 	ret := arr.Broadcast("mul", 5)
+// 	for i, val := range broadcast {
+// 		if math.IsInf(val, 0) || math.IsNaN(val) {
+// 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+// 		} else {
+// 			assert.Equal(t, val, ret[i])
+// 		}
+// 	}
+// }
+
+// func TestNumpythonicFloatArray_Brodcast_div(t *testing.T) {
+// 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+// 	broadcast := helper.NumpythonicFloatArray{0.5,1,1.5,2,2.5, math.Inf(0), math.NaN()}
+
+// 	ret := arr.Broadcast("div", 2)
+// 	for i, val := range broadcast {
+// 		if math.IsInf(val, 0) || math.IsNaN(val) {
+// 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+// 		} else {
+// 			assert.Equal(t, val, ret[i])
+// 		}
+// 	}
+// }
+
+// func TestNumpythonicFloatArray_Brodcast_zeroDevide(t *testing.T) {
+// 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+// 	broadcast := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+
+// 	ret := arr.Broadcast("div", 0)
+// 	for i, val := range broadcast {
+// 		if math.IsInf(val, 0) || math.IsNaN(val) {
+// 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+// 		} else {
+// 			assert.Equal(t, val, ret[i])
+// 		}
+// 	}
+// }
+
+// func TestNumpythonicFloatArray_Brodcast_invalid(t *testing.T) {
+// 	arr := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+// 	broadcast := helper.NumpythonicFloatArray{1,2,3,4,5, math.Inf(0), math.NaN()}
+
+// 	ret := arr.Broadcast("div", 0)
+// 	for i, val := range broadcast {
+// 		if math.IsInf(val, 0) || math.IsNaN(val) {
+// 			assert.True(t, math.IsInf(ret[i], 0) || math.IsNaN(ret[i]))
+// 		} else {
+// 			assert.Equal(t, val, ret[i])
+// 		}
+// 	}
+// }
 
 func TestNumpythonicFloatArray_MaxLen(t *testing.T) {
 	arr := helper.NumpythonicFloatArray{10.0000000, 10000.000, math.NaN(), math.Inf(0)}

@@ -192,73 +192,111 @@ func (arr NumpythonicFloatArray) Percentile(location float64) float64 {
 }
 
 
-// Broadcast returns the array calculated with the given value by the given operation
-func (arr NumpythonicFloatArray) Broadcast(operation string, value float64) NumpythonicFloatArray {
-	retArray := make(NumpythonicFloatArray, len(arr))
+// Add adds the given scalar or Vector to the arr.
+// Vector must be the same length with the arr.
+func (arr NumpythonicFloatArray) Add(value interface{}) NumpythonicFloatArray {
+	retvalue := make(NumpythonicFloatArray, len(arr))
+	switch casted := value.(type) {
 
-	switch operation {
-		case "add" : {
-			retArray = arr.add(value)
+	case float64:
+		for i, val := range arr {
+			retvalue[i] = val + casted
 		}
-		case "sub" : {
-			retArray = arr.sub(value)
+	case NumpythonicFloatArray:
+		for i, val := range arr {
+			retvalue[i] = val + casted[i]
 		}
-		case "mul" : {
-			retArray = arr.mul(value)
-		}
-		case "div" : {
-			retArray = arr.div(value)
-		}
-		default : {
-			retArray = arr
-		}
-
-				
 	}
 
-	return retArray
+	return retvalue
 }
 
-func (arr NumpythonicFloatArray) add(value float64) NumpythonicFloatArray {
-	
-	retArray := make(NumpythonicFloatArray, len(arr))
-	for i, val := range arr {
-		retArray[i] = val + value
-	}
-	return retArray
+// Sub subs the arr with given scalar or Vector.
+// Vector must be the same length with the arr.
+func (arr NumpythonicFloatArray) Sub(value interface{}) NumpythonicFloatArray {
+	retvalue := make(NumpythonicFloatArray, len(arr))
+	switch casted := value.(type) {
 
+	case float64:
+		for i, val := range arr {
+			retvalue[i] = val - casted
+		}
+	case NumpythonicFloatArray:
+		for i, val := range arr {
+			retvalue[i] = val - casted[i]
+		}
+	}
+
+	return retvalue
 }
 
-func (arr NumpythonicFloatArray) sub(value float64) NumpythonicFloatArray {
-	
-	retArray := make(NumpythonicFloatArray, len(arr))
-	for i, val := range arr {
-		retArray[i] = val - value
-	}
-	return retArray
+// Mul multiply the arr with given scalar or Vector.
+// Vector must be the same length with the arr.
+func (arr NumpythonicFloatArray) Mul(value interface{}) NumpythonicFloatArray {
+	retvalue := make(NumpythonicFloatArray, len(arr))
+	switch casted := value.(type) {
 
+	case float64:
+		for i, val := range arr {
+			retvalue[i] = val * casted
+		}
+	case NumpythonicFloatArray:
+		for i, val := range arr {
+			retvalue[i] = val * casted[i]
+		}
+	}
+
+	return retvalue
 }
 
 
-func (arr NumpythonicFloatArray) mul(value float64) NumpythonicFloatArray {
-	
-	retArray := make(NumpythonicFloatArray, len(arr))
-	for i, val := range arr {
-		retArray[i] = val * value
+// Div divedes the arr with given scalar or Vector.
+// Vector must be the same length with the arr.
+func (arr NumpythonicFloatArray) Div(value interface{}) NumpythonicFloatArray {
+	retvalue := make(NumpythonicFloatArray, len(arr))
+	switch casted := value.(type) {
+
+	case float64:
+		for i, val := range arr {
+			if val == 0 {
+				retvalue[i] = math.Inf(0)
+			} else {
+				retvalue[i] = val / casted
+			}
+		}
+	case NumpythonicFloatArray:
+		for i, val := range arr {
+			if val == 0 {
+				retvalue[i] = math.Inf(0)
+			} else {
+				retvalue[i] = val / casted[i]
+			}
+		}
 	}
-	return retArray
+
+	return retvalue
 }
 
-func (arr NumpythonicFloatArray) div(value float64) NumpythonicFloatArray {
-	if value == 0 {
-		return arr
+
+
+
+// Add adds the given scalar or Vector to the arr.
+// Vector must be the same length with the arr.
+func (arr NumpythonicStringArray) Add(value interface{}) NumpythonicStringArray {
+	retvalue := make(NumpythonicStringArray, len(arr))
+	switch casted := value.(type) {
+
+	case string:
+		for i, val := range arr {
+			retvalue[i] = val + casted
+		}
+	case NumpythonicStringArray:
+		for i, val := range arr {
+			retvalue[i] = val + casted[i]
+		}
 	}
 
-	retArray := make(NumpythonicFloatArray, len(arr))
-	for i, val := range arr {
-		retArray[i] = val / value
-	}
-	return retArray
+	return retvalue
 }
 
 

@@ -2,9 +2,11 @@ package core
 
 
 import (
+	"os"
 	"fmt"
 	"strconv"
 	"math"
+	"encoding/csv"
 
 	"lpandas/helper"
 )
@@ -403,4 +405,58 @@ func (sr Series) Display(format string) {
 	default:
 		fmt.Println(sr)	
 	}
+}
+
+
+// ToCsv create csv file and write the Series into it.
+func (sr Series) ToCsv(filePath string, index bool) {
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	
+	csvWriter := csv.NewWriter(file)
+
+	// header
+	header := []string{}
+	if index {
+		header = append(header, "index")
+	}
+	header = append(header, sr.Name)
+	err = csvWriter.Write(header)
+	if err != nil {
+		panic(err)
+	}
+
+	switch values := sr.Values.(type) {
+	case helper.NumpythonicFloatArray:
+		for i := 0; i < len(sr.Index); i++ {
+			row := []string{}
+			if index {
+				row = append(row, sr.Index[i])
+			}
+			row = append(row, fmt.Sprintf("%f", values[i]))
+			err = csvWriter.Write(row)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+	case helper.NumpythonicStringArray:
+		for i := 0; i < len(sr.Index); i++ {
+			row := []string{}
+			if index {
+				row = append(row, sr.Index[i])
+			}
+			row = append(row, values[i])
+			err = csvWriter.Write(row)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+
+	csvWriter.Flush()
+
 }
